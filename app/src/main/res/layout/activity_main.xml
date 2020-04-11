@@ -4,12 +4,85 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
     tools:context=".MainActivity">
 
     <fragment
         android:id="@+id/ar_fragment"
-        android:name="com.google.ar.sceneform.ux.ArFragment"
+        android:name="com.geekymax.volumemeasure.MyArFragment"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!--    <ImageView-->
+    <!--        android:id="@+id/center"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="0dp"-->
+    <!--        android:background="@color/transparent"-->
+    <!--        app:layout_constraintDimensionRatio="3:4"-->
+    <!--        app:layout_constraintTop_toTopOf="parent" />-->
+
+
+    <ImageView
+        android:id="@+id/down"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="0dp"
+        android:background="@color/translucence"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="5:2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <at.markushi.ui.CircleButton
+        android:id="@+id/measure_btn"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:background="@color/transparent"
+        android:clickable="true"
+        android:padding="12dp"
+        android:src="@drawable/add_line_white"
+        android:tint="@color/dark"
+        app:cb_color="@color/qmui_config_color_white"
+        app:layout_constraintBottom_toBottomOf="@id/down"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/down"
+        tools:src="@drawable/add_line" />
+
+    <!--    <ImageButton-->
+    <!--        android:layout_width="48dp"-->
+    <!--        android:layout_height="48dp"-->
+    <!--        android:layout_marginEnd="32dp"-->
+    <!--        android:background="@color/transparent"-->
+    <!--        android:clickable="true"-->
+    <!--        android:focusable="true"-->
+    <!--        android:scaleType="fitCenter"-->
+    <!--        android:src="@drawable/package_line"-->
+    <!--        android:tint="@color/white"-->
+    <!--        app:layout_constraintBottom_toBottomOf="@+id/circleButton"-->
+    <!--        app:layout_constraintEnd_toEndOf="parent"-->
+    <!--        app:layout_constraintTop_toTopOf="@+id/circleButton" />-->
+
+    <!--    <ImageButton-->
+    <!--        android:layout_width="64dp"-->
+    <!--        android:layout_height="64dp"-->
+    <!--        android:layout_marginStart="32dp"-->
+    <!--        android:background="@color/transparent"-->
+    <!--        android:clickable="true"-->
+    <!--        android:focusable="true"-->
+    <!--        android:padding="8dp"-->
+    <!--        android:scaleType="fitCenter"-->
+    <!--        android:theme="@style/RippleWhite"-->
+    <!--        android:tint="@color/white"-->
+    <!--        app:layout_constraintBottom_toBottomOf="@+id/circleButton"-->
+    <!--        app:layout_constraintStart_toStartOf="parent"-->
+    <!--        app:layout_constraintTop_toTopOf="@+id/circleButton"-->
+    <!--        app:srcCompat="@drawable/refresh_line" />-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

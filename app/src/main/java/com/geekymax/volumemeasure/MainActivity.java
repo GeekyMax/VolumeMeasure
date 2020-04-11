@@ -24,27 +24,48 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.geekymax.volumemeasure.entity.ArState;
+import com.geekymax.volumemeasure.entity.OnSceneUpdateListener;
 import com.google.ar.core.Anchor;
+import com.google.ar.core.Camera;
+import com.google.ar.core.Frame;
 import com.google.ar.core.HitResult;
 import com.google.ar.core.Plane;
+import com.google.ar.core.Point;
+import com.google.ar.core.Session;
+import com.google.ar.core.Trackable;
+import com.google.ar.core.TrackingState;
 import com.google.ar.sceneform.AnchorNode;
+import com.google.ar.sceneform.ArSceneView;
+import com.google.ar.sceneform.FrameTime;
+import com.google.ar.sceneform.Scene;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.ux.ArFragment;
 import com.google.ar.sceneform.ux.TransformableNode;
 
+import at.markushi.ui.CircleButton;
+
 /**
- * This is an example activity that uses the Sceneform UX package to make common AR tasks easier.
+ * This is an example activity that uses the Sceneform UX package_1 to make common AR tasks easier.
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnSceneUpdateListener, View.OnClickListener {
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final double MIN_OPENGL_VERSION = 3.0;
 
-    private ArFragment arFragment;
+    private MyArFragment arFragment;
     private ModelRenderable andyRenderable;
+    private Session arSession;
+    private ArState arState;
+
+    // 控件
+    private ImageView translucenceDown;
+    private CircleButton measureButton;
 
     @Override
     @SuppressWarnings({"AndroidApiChecker", "FutureReturnValueIgnored"})
@@ -52,14 +73,13 @@ public class MainActivity extends AppCompatActivity {
     // FutureReturnValueIgnored is not valid
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         if (!checkIsSupportedDeviceOrFinish(this)) {
             return;
         }
-
         setContentView(R.layout.activity_main);
-        arFragment = (ArFragment) getSupportFragmentManager().findFragmentById(R.id.ar_fragment);
-
+        arState = ArState.Initial;
+        arFragment = (MyArFragment) getSupportFragmentManager().findFragmentById(R.id.ar_fragment);
+        Log.d(TAG, "onCreate: " + arSession);
         // When you build a Renderable, Sceneform loads its resources in the background while returning
         // a CompletableFuture. Call thenAccept(), handle(), or check isDone() before calling get().
         ModelRenderable.builder()
@@ -74,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
                             toast.show();
                             return null;
                         });
-
+        arFragment.setOnUpdateListener(this);
         arFragment.setOnTapArPlaneListener(
                 (HitResult hitResult, Plane plane, MotionEvent motionEvent) -> {
                     if (andyRenderable == null) {
@@ -92,6 +112,14 @@ public class MainActivity extends AppCompatActivity {
                     andy.setRenderable(andyRenderable);
                     andy.select();
                 });
+        findWidget();
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        Log.d(TAG, "onResume: Post Activity");
+        arSession = arFragment.getArSceneView().getSession();
     }
 
     /**
@@ -121,5 +149,79 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public void onUpdate(ArSceneView arSceneView) {
+        if (arSceneView == null) {
+            return;
+        }
+        if (arState == ArState.Initial && hasTrackingPlane(arSceneView.getSession())) {
+            this.arState = ArState.Ready;
+            changeWidgetState(true);
+        }
+    }
+
+    private boolean hasTrackingPlane(Session session) {
+        if (session == null) {
+            return false;
+        }
+        for (Plane plane : session.getAllTrackables(Plane.class)) {
+            if (plane.getTrackingState() == TrackingState.TRACKING) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // 界面操作相关函数
+    private void findWidget() {
+        translucenceDown = findViewById(R.id.down);
+        measureButton = findViewById(R.id.measure_btn);
+        measureButton.setVisibility(View.INVISIBLE);
+        translucenceDown.setVisibility(View.INVISIBLE);
+        measureButton.setOnClickListener(this);
+
+    }
+
+    @Override
+    public void onClick(View v) {
+        int height = arFragment.getArSceneView().getHeight();
+        int width = arFragment.getArSceneView().getWidth();
+        Log.d(TAG, "onClick: Height,width is " + height + ", " + width);
+        float x = width / 2.0f;
+        float y = height / 2.0f;
+        try {
+            Frame frame = arSession.update();
+            for (HitResult hitResult : frame.hitTest(x, y)) {
+                if (andyRenderable == null) {
+                    return;
+                }
+                // Create the Anchor.
+                Anchor anchor = hitResult.createAnchor();
+                AnchorNode anchorNode = new AnchorNode(anchor);
+                anchorNode.setParent(arFragment.getArSceneView().getScene());
+
+                // Create the transformable andy and add it to the anchor.
+                TransformableNode andy = new TransformableNode(arFragment.getTransformationSystem());
+                andy.setParent(anchorNode);
+                andy.setRenderable(andyRenderable);
+                andy.select();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+    private void changeWidgetState(boolean available) {
+        if (available) {
+            measureButton.setVisibility(View.VISIBLE);
+            translucenceDown.setVisibility(View.VISIBLE);
+        } else {
+            measureButton.setVisibility(View.INVISIBLE);
+            translucenceDown.setVisibility(View.INVISIBLE);
+        }
     }
 }
