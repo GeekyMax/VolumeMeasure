@@ -23,7 +23,6 @@ import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -31,21 +30,19 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.geekymax.volumemeasure.entity.ArState;
+import com.geekymax.volumemeasure.entity.BoxEdge;
+import com.geekymax.volumemeasure.entity.BoxFace;
+import com.geekymax.volumemeasure.entity.BoxVertex;
 import com.geekymax.volumemeasure.entity.OnSceneUpdateListener;
 import com.google.ar.core.Anchor;
-import com.google.ar.core.Camera;
 import com.google.ar.core.Frame;
 import com.google.ar.core.HitResult;
 import com.google.ar.core.Plane;
-import com.google.ar.core.Point;
 import com.google.ar.core.Session;
-import com.google.ar.core.Trackable;
 import com.google.ar.core.TrackingState;
 import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.ArSceneView;
-import com.google.ar.sceneform.FrameTime;
 import com.google.ar.sceneform.Node;
-import com.google.ar.sceneform.Scene;
 import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.Color;
@@ -53,19 +50,18 @@ import com.google.ar.sceneform.rendering.MaterialFactory;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.ShapeFactory;
 import com.google.ar.sceneform.rendering.ViewRenderable;
-import com.google.ar.sceneform.ux.ArFragment;
-import com.google.ar.sceneform.ux.TransformableNode;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import at.markushi.ui.CircleButton;
 
+
 /**
  * This is an example activity that uses the Sceneform UX package_1 to make common AR tasks easier.
  */
 public class MainActivity extends AppCompatActivity implements OnSceneUpdateListener {
-    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String TAG = "Geeky-Activity";
     private static final double MIN_OPENGL_VERSION = 3.0;
 
     private MyArFragment arFragment;
@@ -112,28 +108,8 @@ public class MainActivity extends AppCompatActivity implements OnSceneUpdateList
                 .build()
                 .thenAccept(renderable -> infoRenderable = renderable);
         arFragment.setOnUpdateListener(this);
-        arFragment.setOnTapArPlaneListener(
-                (HitResult hitResult, Plane plane, MotionEvent motionEvent) -> {
-                    if (andyRenderable == null) {
-                        return;
-                    }
-
-                    // Create the Anchor.
-                    Anchor anchor = hitResult.createAnchor();
-                    AnchorNode anchorNode = new AnchorNode(anchor);
-                    anchorNode.setParent(arFragment.getArSceneView().getScene());
-
-                    // Create the transformable andy and add it to the anchor.
-//                    TransformableNode andy = new TransformableNode(arFragment.getTransformationSystem());
-//                    andy.setParent(anchorNode);
-//                    andy.setRenderable(andyRenderable);
-//                    andy.select();
-                    TransformableNode info = new TransformableNode(arFragment.getTransformationSystem());
-                    info.setParent(anchorNode);
-                    info.setRenderable(infoRenderable);
-                    info.select();
-                });
         findWidget();
+//        MathUtil.test();
     }
 
     @Override
@@ -172,6 +148,7 @@ public class MainActivity extends AppCompatActivity implements OnSceneUpdateList
         return true;
     }
 
+    // 每帧更新时调用
     @Override
     public void onUpdate(ArSceneView arSceneView) {
         if (arSceneView == null) {
@@ -209,20 +186,17 @@ public class MainActivity extends AppCompatActivity implements OnSceneUpdateList
             float y = height / 2.0f;
             try {
                 Frame frame = arSession.update();
+                boolean one = false;
                 for (HitResult hitResult : frame.hitTest(x, y)) {
                     if (andyRenderable == null) {
                         return;
                     }
+                    if (one) {
+                        return;
+                    }
+                    one = true;
                     // Create the Anchor.
                     Anchor anchor = hitResult.createAnchor();
-//                    AnchorNode anchorNode = new AnchorNode(anchor);
-//                    anchorNode.setParent(arFragment.getArSceneView().getScene());
-//
-//                    // Create the transformable andy and add it to the anchor.
-//                    TransformableNode andy = new TransformableNode(arFragment.getTransformationSystem());
-//                    andy.setParent(anchorNode);
-//                    andy.setRenderable(andyRenderable);
-//                    andy.select();
                     drawBox(anchor, 0.2f, 0.4f, 0.3f);
                 }
             } catch (Exception e) {
@@ -247,20 +221,105 @@ public class MainActivity extends AppCompatActivity implements OnSceneUpdateList
         AnchorNode anchorNode = new AnchorNode(startAnchor);
         anchorNode.setParent(arFragment.getArSceneView().getScene());
         List<Vector3> locations = new ArrayList<>();
-        for (int i = 0; i <= 1; i++) {
-            for (int j = 0; j <= 1; j++) {
-                for (int k = 0; k <= 1; k++) {
-                    locations.add(Vector3.add(new Vector3(a * i, h * j, k * b), new Vector3(-a / 2, 0, -b / 2)));
+        List<BoxVertex> boxVertices = new ArrayList<>();
+        List<BoxEdge> boxEdges = new ArrayList<>();
+        List<BoxFace> boxFaces = new ArrayList<>();
+        for (float i = 0; i <= 1; i++) {
+            for (float j = 0; j <= 1; j++) {
+                for (float k = 0; k <= 1; k++) {
+                    locations.add(new Vector3((i - 1 / 2f) * a, h * (j - 1 / 2f), (k - 1 / 2f) * b));
                 }
             }
         }
-        drawPoint(anchorNode, locations);
-        locations.forEach(v1 -> locations.forEach(v2 -> {
-            Vector3 sub = Vector3.subtract(v1, v2);
-            if (sub.x == 0 && sub.y == 0 && sub.z > 0 || sub.x == 0 && sub.z == 0 && sub.y > 0 || sub.z == 0 && sub.y == 0 && sub.x > 0) {
-                drawLine(anchorNode, v1, v2);
-            }
-        }));
+
+
+        MaterialFactory.makeOpaqueWithColor(this, new Color(0.53f, 0.92f, 0f)).thenAccept(material -> {
+            ModelRenderable sphere = ShapeFactory.makeSphere(0.01f, new Vector3(0.0f, 0.0f, 0.0f), material);
+            locations.forEach(loc -> {
+                BoxVertex boxVertex = new BoxVertex(loc, anchorNode, sphere);
+                boxVertices.add(boxVertex);
+                boxVertex.update();
+            });
+            MaterialFactory.makeOpaqueWithColor(this, new Color(0.3f, 0.87f, 0f, 0f)).thenAccept(material2 -> {
+                for (int i = 0; i < boxVertices.size(); i++) {
+                    for (int j = 0; j < boxVertices.size(); j++) {
+                        Log.d(TAG, "drawBox: boxEdge: " + i + " " + j + ":" + isEdge(i, j));
+                        if (isEdge(i, j)) {
+                            BoxEdge boxEdge = new BoxEdge(boxVertices.get(i), boxVertices.get(j), anchorNode, material);
+                            boxEdges.add(boxEdge);
+                            boxEdge.update();
+                        }
+                    }
+                }
+            });
+            MaterialFactory.makeOpaqueWithColor(this, new Color(0.3f, 0.87f, 0f, 0f)).thenAccept(material2 -> {
+                for (int i = 0; i < boxVertices.size(); i++) {
+                    for (int j = 0; j < boxVertices.size(); j++) {
+                        for (int k = 0; k < boxVertices.size(); k++) {
+                            for (int l = 0; l < boxVertices.size(); l++) {
+                                if (isFace(i, j, k, l)) {
+                                    BoxFace boxFace = new BoxFace(anchorNode, material2);
+                                    boxFace.addVertex(boxVertices.get(i));
+                                    boxFace.addVertex(boxVertices.get(j));
+                                    boxFace.addVertex(boxVertices.get(l));
+                                    boxFace.addVertex(boxVertices.get(k));
+                                    boxFaces.add(boxFace);
+                                    boxFace.update();
+
+                                }
+                            }
+                        }
+                    }
+                }
+
+            });
+
+        });
+    }
+
+    private boolean isEdge(int i, int j) {
+        if (i <= j) {
+            return false;
+        }
+        int i3 = i % 2;
+        i = i / 2;
+        int i2 = i % 2;
+        i = i / 2;
+        int i1 = i % 2;
+        int j3 = j % 2;
+        j = j / 2;
+        int j2 = j % 2;
+        j = j / 2;
+        int j1 = j % 2;
+        return i1 == j1 && i2 == j2 || i1 == j1 && i3 == j3 || i3 == j3 && i2 == j2;
+    }
+
+    private boolean isFace(int i, int j, int k, int l) {
+        if (!(i > j && j > k && k > l)) {
+            return false;
+        }
+        int i3 = i % 2;
+        i = i / 2;
+        int i2 = i % 2;
+        i = i / 2;
+        int i1 = i % 2;
+        int j3 = j % 2;
+        j = j / 2;
+        int j2 = j % 2;
+        j = j / 2;
+        int j1 = j % 2;
+        int k3 = k % 2;
+        k = k / 2;
+        int k2 = k % 2;
+        k = k / 2;
+        int k1 = k % 2;
+        int l3 = l % 2;
+        l = l / 2;
+        int l2 = l % 2;
+        l = l / 2;
+        int l1 = l % 2;
+        return i1 == j1 && j1 == k1 && k1 == l1 || i2 == j2 && j2 == k2 && k2 == l2 || i3 == j3 && j3 == k3 && k3 == l3;
+
     }
 
     private void drawPoint(AnchorNode anchorNode, List<Vector3> locations) {
@@ -306,4 +365,6 @@ public class MainActivity extends AppCompatActivity implements OnSceneUpdateList
             areaNode.setLocalRotation(rotationFromAToB);
         });
     }
+
+
 }
