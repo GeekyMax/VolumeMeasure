@@ -33,6 +33,7 @@ import com.geekymax.volumemeasure.entity.BoxEdge;
 import com.geekymax.volumemeasure.entity.BoxFace;
 import com.geekymax.volumemeasure.entity.BoxVertex;
 import com.geekymax.volumemeasure.entity.OnSceneUpdateListener;
+import com.geekymax.volumemeasure.manager.MaterialManager;
 import com.google.ar.core.Anchor;
 import com.google.ar.core.Frame;
 import com.google.ar.core.HitResult;
@@ -41,9 +42,11 @@ import com.google.ar.core.Session;
 import com.google.ar.core.TrackingState;
 import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.ArSceneView;
+import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.Color;
+import com.google.ar.sceneform.rendering.Light;
 import com.google.ar.sceneform.rendering.MaterialFactory;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.ShapeFactory;
@@ -60,7 +63,7 @@ import at.markushi.ui.CircleButton;
 public class MainActivity extends AppCompatActivity implements OnSceneUpdateListener {
     private static final String TAG = "Geeky-Activity";
     private static final double MIN_OPENGL_VERSION = 3.0;
-
+    public static final float PI = 3.1415926f;
     private MyArFragment arFragment;
     private Session arSession;
     // 当前全局状态
@@ -76,6 +79,13 @@ public class MainActivity extends AppCompatActivity implements OnSceneUpdateList
     List<BoxEdge> boxEdges = new ArrayList<>();
     List<BoxFace> boxFaces = new ArrayList<>();
 
+    // anchor 和parent
+    AnchorNode anchorNode;
+    Node rootNode;
+
+    // manager
+    MaterialManager materialManager;
+
     @Override
     @SuppressWarnings({"AndroidApiChecker", "FutureReturnValueIgnored"})
     // CompletableFuture requires api level 24
@@ -90,6 +100,8 @@ public class MainActivity extends AppCompatActivity implements OnSceneUpdateList
         arFragment = (MyArFragment) getSupportFragmentManager().findFragmentById(R.id.ar_fragment);
         Log.d(TAG, "onCreate: " + arSession);
         arFragment.setOnUpdateListener(this);
+        arFragment.getArSceneView().getPlaneRenderer().setShadowReceiver(false);
+        materialManager = MaterialManager.getInstance(this);
         findWidget();
     }
 
@@ -170,15 +182,17 @@ public class MainActivity extends AppCompatActivity implements OnSceneUpdateList
             float y = height / 2.0f;
             try {
                 Frame frame = arSession.update();
-                boolean one = false;
                 List<HitResult> hitResults = frame.hitTest(x, y);
                 if (hitResults.size() > 0) {
                     arState = ArState.MEASURING;
                     // Create the Anchor.
                     Anchor anchor = hitResults.get(0).createAnchor();
-                    AnchorNode anchorNode = new AnchorNode(anchor);
-                    anchorNode.setLocalRotation(Quaternion.axisAngle(new Vector3(0, 1, 0), 1));
-                    drawBox(anchorNode, 0.2f, 0.4f, 0.3f);
+                    anchorNode = new AnchorNode(anchor);
+                    anchorNode.setParent(arFragment.getArSceneView().getScene());
+                    rootNode = new Node();
+                    rootNode.setParent(anchorNode);
+                    rootNode.setLocalRotation(Quaternion.axisAngle(new Vector3(0, 1, 0), 30));
+                    drawBox(rootNode, 0.2f, 0.4f, 0.3f);
                     arState = ArState.DONE;
                 }
             } catch (Exception e) {
@@ -197,9 +211,8 @@ public class MainActivity extends AppCompatActivity implements OnSceneUpdateList
         }
     }
 
-    private void drawBox(AnchorNode anchorNode, float a, float b, float h) {
+    private void drawBox(Node parent, float a, float b, float h) {
         clearBox();
-        anchorNode.setParent(arFragment.getArSceneView().getScene());
         for (float i = 0; i <= 1; i++) {
             for (float j = 0; j <= 1; j++) {
                 for (float k = 0; k <= 1; k++) {
@@ -207,49 +220,45 @@ public class MainActivity extends AppCompatActivity implements OnSceneUpdateList
                 }
             }
         }
-
-        MaterialFactory.makeOpaqueWithColor(this, new Color(0.53f, 0.92f, 0f)).thenAccept(material -> {
-            ModelRenderable sphere = ShapeFactory.makeSphere(0.01f, new Vector3(0.0f, 0.0f, 0.0f), material);
-            locations.forEach(loc -> {
-                BoxVertex boxVertex = new BoxVertex(loc, anchorNode, sphere);
-                boxVertices.add(boxVertex);
-                boxVertex.update();
-            });
-            MaterialFactory.makeOpaqueWithColor(this, new Color(0.9f, 0.3f, 0.3f, 0f)).thenAccept(material2 -> {
-                for (int i = 0; i < boxVertices.size(); i++) {
-                    for (int j = 0; j < boxVertices.size(); j++) {
-                        Log.d(TAG, "drawBox: boxEdge: " + i + " " + j + ":" + isEdge(i, j));
-                        if (isEdge(i, j)) {
-                            BoxEdge boxEdge = new BoxEdge(boxVertices.get(i), boxVertices.get(j), anchorNode, material);
-                            boxEdges.add(boxEdge);
-                            boxEdge.update();
-                        }
-                    }
-                }
-            });
-            MaterialFactory.makeOpaqueWithColor(this, new Color(0.3f, 0.9f, 0.3f, 0f)).thenAccept(material2 -> {
-                for (int i = 0; i < boxVertices.size(); i++) {
-                    for (int j = 0; j < boxVertices.size(); j++) {
-                        for (int k = 0; k < boxVertices.size(); k++) {
-                            for (int l = 0; l < boxVertices.size(); l++) {
-                                if (isFace(i, j, k, l)) {
-                                    BoxFace boxFace = new BoxFace(anchorNode, material2);
-                                    boxFace.addVertex(boxVertices.get(i));
-                                    boxFace.addVertex(boxVertices.get(j));
-                                    boxFace.addVertex(boxVertices.get(l));
-                                    boxFace.addVertex(boxVertices.get(k));
-                                    boxFaces.add(boxFace);
-                                    boxFace.update();
-
-                                }
-                            }
-                        }
-                    }
-                }
-
-            });
-
+        ModelRenderable sphere = ShapeFactory.makeSphere(0.01f, new Vector3(0.0f, 0.0f, 0.0f), MaterialManager.getInstance().getMaterial(MaterialManager.MATERIAL_VERTEX_DEFAULT));
+        sphere.setShadowCaster(false);
+        sphere.setShadowReceiver(false);
+        locations.forEach(loc -> {
+            BoxVertex boxVertex = new BoxVertex(loc, parent, sphere);
+            boxVertices.add(boxVertex);
+            boxVertex.update();
         });
+        for (int i = 0; i < boxVertices.size(); i++) {
+            for (int j = 0; j < boxVertices.size(); j++) {
+                Log.d(TAG, "drawBox: boxEdge: " + i + " " + j + ":" + isEdge(i, j));
+                if (isEdge(i, j)) {
+                    BoxEdge boxEdge = new BoxEdge(boxVertices.get(i), boxVertices.get(j), parent, MaterialManager.getInstance().getMaterial(MaterialManager.MATERIAL_EDGE_DEFAULT));
+                    boxEdges.add(boxEdge);
+                    boxEdge.update();
+                }
+            }
+        }
+
+        for (int i = 0; i < boxVertices.size(); i++) {
+            for (int j = 0; j < boxVertices.size(); j++) {
+                for (int k = 0; k < boxVertices.size(); k++) {
+                    for (int l = 0; l < boxVertices.size(); l++) {
+                        if (isFace(i, j, k, l)) {
+                            BoxFace boxFace = new BoxFace(parent, MaterialManager.getInstance().getMaterial(MaterialManager.MATERIAL_FACE_DEFAULT));
+                            boxFace.addVertex(boxVertices.get(i));
+                            boxFace.addVertex(boxVertices.get(j));
+                            boxFace.addVertex(boxVertices.get(l));
+                            boxFace.addVertex(boxVertices.get(k));
+                            boxFaces.add(boxFace);
+                            boxFace.update();
+
+                        }
+                    }
+                }
+            }
+        }
+
+
     }
 
     private void clearBox() {

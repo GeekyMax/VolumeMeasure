@@ -1,10 +1,11 @@
 package com.geekymax.volumemeasure.math;
 
+import com.google.ar.sceneform.math.Vector3;
+
 /**
  * 三维向量
- * 
- * @author yanmaoyuan
  *
+ * @author yanmaoyuan
  */
 public class Vector3f {
 
@@ -14,15 +15,25 @@ public class Vector3f {
     public final static Vector3f UNIT_X = new Vector3f(1, 0, 0);
     public final static Vector3f UNIT_Y = new Vector3f(0, 1, 0);
     public final static Vector3f UNIT_Z = new Vector3f(0, 0, 1);
-    
+
     // 零向量
     public final static Vector3f ZERO = new Vector3f(0, 0, 0);
-    
+
     /**
      * 构造方法
      */
     public Vector3f() {
         x = y = z = 0;
+    }
+
+    public Vector3f(Vector3 v) {
+        x = v.x;
+        y = v.y;
+        z = v.z;
+    }
+
+    public Vector3 toVector3() {
+        return new Vector3(x, y, z);
     }
 
     /**
@@ -36,6 +47,7 @@ public class Vector3f {
 
     /**
      * 使用已知向量来构造另一个向量。
+     *
      * @param v
      */
     public Vector3f(Vector3f v) {
@@ -43,19 +55,19 @@ public class Vector3f {
         this.y = v.y;
         this.z = v.z;
     }
-    
+
     /**
      * 求负向量
-     * 
+     *
      * @return
      */
     public Vector3f negate() {
         return new Vector3f(-x, -y, -z);
     }
-    
+
     /**
      * 求负向量
-     * 
+     *
      * @return
      */
     public Vector3f negateLocal() {
@@ -64,10 +76,10 @@ public class Vector3f {
         z = -z;
         return this;
     }
-    
+
     /**
      * 返回向量长度的平方
-     * 
+     *
      * @return
      */
     public float lengthSquared() {
@@ -76,7 +88,7 @@ public class Vector3f {
 
     /**
      * 返回向量的长度
-     * 
+     *
      * @return
      */
     public float length() {
@@ -94,7 +106,7 @@ public class Vector3f {
         }
         return new Vector3f(x, y, z);
     }
-    
+
     /**
      * 求单位向量
      */
@@ -108,10 +120,10 @@ public class Vector3f {
         }
         return this;
     }
-    
+
     /**
      * 求两点之间的距离
-     * 
+     *
      * @param v
      * @return
      */
@@ -121,10 +133,10 @@ public class Vector3f {
         double dz = z - v.z;
         return (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
     }
-    
+
     /**
      * 求两点之间距离的平方
-     * 
+     *
      * @param v
      * @return
      */
@@ -137,16 +149,17 @@ public class Vector3f {
 
     /**
      * 向量加法
-     * 
+     *
      * @param v
      * @return
      */
     public Vector3f add(Vector3f v) {
         return new Vector3f(x + v.x, y + v.y, z + v.z);
     }
-    
+
     /**
      * 向量加法
+     *
      * @param vec
      * @param result
      * @return
@@ -158,9 +171,10 @@ public class Vector3f {
         result.z = z + vec.z;
         return result;
     }
-    
+
     /**
      * 向量加法
+     *
      * @param v
      * @return
      */
@@ -173,20 +187,21 @@ public class Vector3f {
 
     /**
      * 向量减法
-     * 
+     *
      * @param v
      * @return
      */
     public Vector3f subtract(Vector3f v) {
         return new Vector3f(x - v.x, y - v.y, z - v.z);
     }
-    
+
     /**
      * 向量减法
+     *
      * @return
      */
     public Vector3f subtract(Vector3f v, Vector3f result) {
-        if(result == null) {
+        if (result == null) {
             result = new Vector3f();
         }
         result.x = x - v.x;
@@ -194,10 +209,10 @@ public class Vector3f {
         result.z = z - v.z;
         return result;
     }
-    
+
     /**
      * 向量减法
-     * 
+     *
      * @param v
      * @return
      */
@@ -210,17 +225,17 @@ public class Vector3f {
 
     /**
      * 标量乘法
-     * 
+     *
      * @param scalor
      * @return
      */
     public Vector3f mult(float scalor) {
         return new Vector3f(x * scalor, y * scalor, z * scalor);
     }
-    
+
     /**
      * 标量乘法
-     * 
+     *
      * @param scalor
      * @return
      */
@@ -231,10 +246,10 @@ public class Vector3f {
         store.set(x * scalor, y * scalor, z * scalor);
         return store;
     }
-    
+
     /**
      * 标量乘法
-     * 
+     *
      * @param scalor
      * @return
      */
@@ -244,10 +259,10 @@ public class Vector3f {
         z *= scalor;
         return this;
     }
-    
+
     /**
      * 向量乘法
-     * 
+     *
      * @param v
      * @return
      */
@@ -257,6 +272,7 @@ public class Vector3f {
 
     /**
      * 向量乘法
+     *
      * @param vec
      * @param store
      * @return
@@ -265,10 +281,10 @@ public class Vector3f {
         if (store == null) store = new Vector3f();
         return store.set(x * vec.x, y * vec.y, z * vec.z);
     }
-    
+
     /**
      * 向量乘法
-     * 
+     *
      * @param v
      * @return
      */
@@ -278,9 +294,10 @@ public class Vector3f {
         z *= v.z;
         return this;
     }
-    
+
     /**
      * 标量除法
+     *
      * @param scalor
      * @return
      */
@@ -288,9 +305,10 @@ public class Vector3f {
         scalor = 1 / scalor;
         return new Vector3f(x * scalor, y * scalor, z * scalor);
     }
-    
+
     /**
      * 标量除法
+     *
      * @param scalor
      * @return
      */
@@ -304,15 +322,17 @@ public class Vector3f {
 
     /**
      * 向量除法
+     *
      * @param v
      * @return
      */
     public Vector3f divide(Vector3f v) {
-        return new Vector3f( x / v.x, y / v.y, z / v.z);
+        return new Vector3f(x / v.x, y / v.y, z / v.z);
     }
-    
+
     /**
      * 向量除法
+     *
      * @param v
      * @return
      */
@@ -322,10 +342,10 @@ public class Vector3f {
         z /= v.z;
         return this;
     }
-    
+
     /**
      * 向量点乘（内积）
-     * 
+     *
      * @param v
      * @return
      */
@@ -336,7 +356,7 @@ public class Vector3f {
     /**
      * 求两个向量之间的夹角（弧度制）
      * 注意：参与运算的两个向量都应该是单位向量
-     * 
+     *
      * @param v
      * @return
      */
@@ -345,14 +365,14 @@ public class Vector3f {
         float angle = (float) Math.acos(dotProduct);
         return angle;
     }
-    
+
     /**
      * 向量投影
      *
      * @param v
      * @return 返回一个新的向量，它平行于另一个向量。
      */
-    public Vector3f project(Vector3f v){
+    public Vector3f project(Vector3f v) {
         float n = x * v.x + y * v.y + z * v.z; // A . B
         float d = v.lengthSquared(); // |B|^2
         float scalor = n / d;
@@ -361,10 +381,11 @@ public class Vector3f {
 
     /**
      * 向量投影
+     *
      * @param v
      * @return 返回一个新的向量，它平行于另一个向量。
      */
-    public Vector3f projectLocal(Vector3f v){
+    public Vector3f projectLocal(Vector3f v) {
         float n = this.dot(v); // A . B
         float d = v.lengthSquared(); // |B|^2
         float scalor = n / d;
@@ -373,10 +394,10 @@ public class Vector3f {
         z = v.z * scalor;
         return this;
     }
-    
+
     /**
      * 向量叉乘（外积）
-     * 
+     *
      * @param v
      * @return 返回一个新的向量，它垂直于当前两个向量。
      */
@@ -386,26 +407,26 @@ public class Vector3f {
         float rz = x * v.y - y * v.x;
         return new Vector3f(rx, ry, rz);
     }
-    
+
     /**
      * 向量叉乘（外积）
-     * 
+     *
      * @param v
      * @param result
      * @return
      */
     public Vector3f cross(Vector3f v, Vector3f result) {
         if (result == null) result = new Vector3f();
-        float resX = ((y * v.x) - (z * v.y)); 
+        float resX = ((y * v.x) - (z * v.y));
         float resY = ((z * v.x) - (x * v.z));
         float resZ = ((x * v.y) - (y * v.x));
         result.set(resX, resY, resZ);
         return result;
     }
-    
+
     /**
      * 向量叉乘（外积）
-     * 
+     *
      * @param v
      * @return 返回一个新的向量，它垂直于当前两个向量。
      */
@@ -417,38 +438,40 @@ public class Vector3f {
         y = tempY;
         return this;
     }
-    
+
     /**
      * 在当前向量与final向量之间线性插值。
-     * 
+     * <p>
      * this=(1-changeAmnt)*this + changeAmnt * finalVec
-     * @param finalVec 终向量
+     *
+     * @param finalVec   终向量
      * @param changeAmnt 插值系数，取值范围为 0.0 - 1.0。
      */
     public Vector3f interpolateLocal(Vector3f finalVec, float changeAmnt) {
-        this.x=(1-changeAmnt)*this.x + changeAmnt*finalVec.x;
-        this.y=(1-changeAmnt)*this.y + changeAmnt*finalVec.y;
-        this.z=(1-changeAmnt)*this.z + changeAmnt*finalVec.z;
+        this.x = (1 - changeAmnt) * this.x + changeAmnt * finalVec.x;
+        this.y = (1 - changeAmnt) * this.y + changeAmnt * finalVec.y;
+        this.z = (1 - changeAmnt) * this.z + changeAmnt * finalVec.z;
         return this;
     }
 
     /**
      * 在当开始向量与终向量之间线性插值。
      * this=(1-changeAmnt)*beginVec + changeAmnt * finalVec
-     * @param beginVec 开始向量（changeAmnt = 0）
-     * @param finalVec 终向量（changeAmnt = 1）
+     *
+     * @param beginVec   开始向量（changeAmnt = 0）
+     * @param finalVec   终向量（changeAmnt = 1）
      * @param changeAmnt 插值系数，取值范围为 0.0 - 1.0。
      */
-    public Vector3f interpolateLocal(Vector3f beginVec,Vector3f finalVec, float changeAmnt) {
-        this.x=(1-changeAmnt)*beginVec.x + changeAmnt*finalVec.x;
-        this.y=(1-changeAmnt)*beginVec.y + changeAmnt*finalVec.y;
-        this.z=(1-changeAmnt)*beginVec.z + changeAmnt*finalVec.z;
+    public Vector3f interpolateLocal(Vector3f beginVec, Vector3f finalVec, float changeAmnt) {
+        this.x = (1 - changeAmnt) * beginVec.x + changeAmnt * finalVec.x;
+        this.y = (1 - changeAmnt) * beginVec.y + changeAmnt * finalVec.y;
+        this.z = (1 - changeAmnt) * beginVec.z + changeAmnt * finalVec.z;
         return this;
     }
-    
+
     /**
      * 设置向量的三个分量。
-     * 
+     *
      * @param x
      * @param y
      * @param z
@@ -462,6 +485,7 @@ public class Vector3f {
 
     /**
      * 设置向量的三个分量
+     *
      * @param v
      */
     public Vector3f set(Vector3f v) {
@@ -470,7 +494,7 @@ public class Vector3f {
         this.z = v.z;
         return this;
     }
-    
+
     // 基本的Getter和Setter
 
     public float getX() {

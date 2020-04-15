@@ -23,30 +23,29 @@ public class MathUtil {
     }
 
     // 根据三个坐标轴向量获取坐标系旋转四元数
-    public static Quaternion getRotationQuaternion(Vector3 v1, Vector3 v2, Vector3 v3) {
+    public static Matrix3f getRotationMatrix(Vector3 v1, Vector3 v2, Vector3 v3) {
         Vector3 axis1 = new Vector3(1, 0, 0);
         Vector3 axis2 = new Vector3(0, 1, 0);
         Vector3 axis3 = new Vector3(0, 0, -1);
-        return getRotationQuaternion(axis1, axis2, axis3, v1, v2, v3);
+        return getRotationMatrix(axis1, axis2, axis3, v1, v2, v3);
     }
 
-    private static Quaternion getRotationQuaternion(Vector3 v11, Vector3 v12, Vector3 v13, Vector3 v21, Vector3 v22, Vector3 v23) {
-        Matrix3f ma = new Matrix3f(v11.x, v11.y, v11.z, v12.x, v12.y, v12.z, v13.x, v13.y, v13.z);
-        Matrix3f mb = new Matrix3f(v21.x, v21.y, v21.z, v22.x, v22.y, v22.z, v23.x, v23.y, v23.z);
-        Log.d(TAG, "getRotationQuaternion: B:" + mb);
-        Matrix3f inverseMb = mb.invert();
-        Matrix3f r = ma.mult(inverseMb);
-        Log.d(TAG, "getRotationQuaternion: R:" + r);
+
+    public static Quaternion rotationMatrixToQuaternion(Matrix3f r) {
         com.geekymax.volumemeasure.math.Quaternion q = new com.geekymax.volumemeasure.math.Quaternion();
         q.fromRotationMatrix(r);
-        Quaternion quaternion = arQuaternion(q);
-        Log.d(TAG, "getRotationQuaternion: Q:" + quaternion);
-        Vector3 res = Quaternion.rotateVector(quaternion, new Vector3(1, 1, 1));
-        Log.d(TAG, "getRotationQuaternion: Res:" + res);
-        return quaternion;
+        return arQuaternion(q);
     }
 
-    public static Quaternion arQuaternion(com.geekymax.volumemeasure.math.Quaternion q) {
+    private static Matrix3f getRotationMatrix(Vector3 v11, Vector3 v12, Vector3 v13, Vector3 v21, Vector3 v22, Vector3 v23) {
+        Matrix3f ma = new Matrix3f(v11.x, v11.y, v11.z, v12.x, v12.y, v12.z, v13.x, v13.y, v13.z);
+        Matrix3f mb = new Matrix3f(v21.x, v21.y, v21.z, v22.x, v22.y, v22.z, v23.x, v23.y, v23.z);
+        Matrix3f inverseMb = mb.invert();
+        Matrix3f r = ma.mult(inverseMb);
+        return r;
+    }
+
+    private static Quaternion arQuaternion(com.geekymax.volumemeasure.math.Quaternion q) {
         return new Quaternion(q.x, q.y, q.z, q.w);
     }
 

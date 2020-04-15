@@ -1,37 +1,39 @@
 package com.geekymax.volumemeasure.math;
 
 
+import com.google.ar.sceneform.math.Vector3;
+
 /**
  * 3*3矩阵
- * 
- * @author yanmaoyuan
  *
+ * @author yanmaoyuan
  */
 public class Matrix3f {
 
     protected float m00, m01, m02;
     protected float m10, m11, m12;
     protected float m20, m21, m22;
-    
+
     /**
      * 零矩阵
      */
     public static final Matrix3f ZERO = new Matrix3f(0, 0, 0, 0, 0, 0, 0, 0, 0);
-    
+
     /**
      * 单位矩阵
      */
     public final static Matrix3f IDENTITY = new Matrix3f();
-    
+
     /**
      * 初始化为单位矩阵。
      */
     public Matrix3f() {
         loadIdentity();
     }
-    
+
     /**
      * 初始化矩阵
+     *
      * @param m00
      * @param m01
      * @param m02
@@ -43,7 +45,7 @@ public class Matrix3f {
      * @param m22
      */
     public Matrix3f(float m00, float m01, float m02, float m10, float m11,
-            float m12, float m20, float m21, float m22) {
+                    float m12, float m20, float m21, float m22) {
 
         this.m00 = m00;
         this.m01 = m01;
@@ -55,17 +57,19 @@ public class Matrix3f {
         this.m21 = m21;
         this.m22 = m22;
     }
-    
+
     /**
      * 使用另一个矩阵来初始化矩阵
+     *
      * @param mat3
      */
     public Matrix3f(Matrix3f mat3) {
         set(mat3);
     }
-    
+
     /**
      * 复制另一个矩阵的值
+     *
      * @param matrix
      * @return
      */
@@ -85,7 +89,7 @@ public class Matrix3f {
         }
         return this;
     }
-    
+
     /**
      * 单位矩阵
      */
@@ -93,7 +97,7 @@ public class Matrix3f {
         m01 = m02 = m10 = m12 = m20 = m21 = 0;
         m00 = m11 = m22 = 1;
     }
-    
+
     /**
      * 零矩阵
      */
@@ -101,17 +105,19 @@ public class Matrix3f {
         m00 = m01 = m02 = m10 = m11 = m12 = m20 = m21 = m22 = 0.0f;
         return this;
     }
-    
+
     /**
      * 求转置矩阵
+     *
      * @return
      */
     public Matrix3f transpose() {
         return new Matrix3f(m00, m10, m20, m01, m11, m21, m02, m12, m22);
     }
-    
+
     /**
      * 求转置矩阵
+     *
      * @return
      */
     public Matrix3f transposeLocal() {
@@ -126,12 +132,13 @@ public class Matrix3f {
         tmp = m12;
         m12 = m21;
         m21 = tmp;
-        
+
         return this;
     }
-    
+
     /**
      * 标量乘法
+     *
      * @param scalor
      * @return
      */
@@ -147,10 +154,10 @@ public class Matrix3f {
         m22 *= scalor;
         return this;
     }
-    
+
     /**
      * 矩阵乘法
-     * 
+     *
      * @param mat
      * @param product 结果矩阵
      * @return 返回一个新的Matrix3f对象，携带计算结果。
@@ -186,9 +193,10 @@ public class Matrix3f {
 
         return product;
     }
-    
+
     /**
      * 矩阵乘法
+     *
      * @param mat
      * @return
      */
@@ -198,16 +206,17 @@ public class Matrix3f {
 
     /**
      * 矩阵乘法
+     *
      * @param mat
      * @return
      */
     public Matrix3f multLocal(Matrix3f mat) {
         return mult(mat, this);
     }
-    
+
     /**
      * 计算矩阵与vec的乘积，结果保存在新的Vector3f对象中。
-     * 
+     *
      * @param vec
      * @return
      */
@@ -215,9 +224,14 @@ public class Matrix3f {
         return mult(vec, null);
     }
 
+    public Vector3 mult(Vector3 vec) {
+        Vector3f v = mult(new Vector3f(vec));
+        return v.toVector3();
+    }
+
     /**
      * 计算矩阵与vec的乘积，结果保存在product对象中。
-     * 
+     *
      * @param vec
      * @param product
      * @return
@@ -240,7 +254,7 @@ public class Matrix3f {
 
     /**
      * 计算矩阵与向量vec的乘积，结果保存在该vec中。
-     * 
+     *
      * @param vec
      * @return
      */
@@ -255,9 +269,10 @@ public class Matrix3f {
         vec.z = m20 * x + m21 * y + m22 * vec.z;
         return vec;
     }
-    
+
     /**
      * 计算行列式
+     *
      * @return
      */
     public float determinant() {
@@ -267,10 +282,10 @@ public class Matrix3f {
         float fDet = m00 * fCo00 + m01 * fCo10 + m02 * fCo20;
         return fDet;
     }
-    
+
     /**
      * 求Matrix3f的标准伴随矩阵。
-     * 
+     *
      * @return
      */
     public Matrix3f adjoint() {
@@ -279,7 +294,7 @@ public class Matrix3f {
 
     /**
      * 求Matrix3f的标准伴随矩阵，结果保存为store对象。
-     * 
+     *
      * @param store
      * @return
      */
@@ -300,10 +315,10 @@ public class Matrix3f {
 
         return store;
     }
-    
+
     /**
      * 求矩阵的逆
-     * 
+     *
      * @return
      */
     public Matrix3f invert() {
@@ -312,7 +327,7 @@ public class Matrix3f {
 
     /**
      * 求矩阵的逆
-     * 
+     *
      * @return The store
      */
     public Matrix3f invert(Matrix3f store) {
@@ -341,7 +356,7 @@ public class Matrix3f {
 
     /**
      * 求矩阵的逆
-     * 
+     *
      * @return this
      */
     public Matrix3f invertLocal() {
@@ -373,80 +388,116 @@ public class Matrix3f {
         multLocal(1f / det);
         return this;
     }
-    
+
     /**
      * 比例变换矩阵
+     *
      * @param v
      * @return
      */
     public Matrix3f fromScale(Vector3f v) {
-        m00 = v.x; m01 = 0;   m02 = 0;
-        m10 = 0;   m11 = v.y; m12 = 0;
-        m20 = 0;   m21 = 0;   m22 = v.z;
+        m00 = v.x;
+        m01 = 0;
+        m02 = 0;
+        m10 = 0;
+        m11 = v.y;
+        m12 = 0;
+        m20 = 0;
+        m21 = 0;
+        m22 = v.z;
         return this;
     }
-    
+
     /**
      * 比例变换矩阵
+     *
      * @return
      */
     public Matrix3f fromScale(float x, float y, float z) {
-        m00 = x; m01 = 0; m02 = 0;
-        m10 = 0; m11 = y; m12 = 0;
-        m20 = 0; m21 = 0; m22 = z;
+        m00 = x;
+        m01 = 0;
+        m02 = 0;
+        m10 = 0;
+        m11 = y;
+        m12 = 0;
+        m20 = 0;
+        m21 = 0;
+        m22 = z;
         return this;
     }
-    
+
     /**
      * 绕x轴旋转
+     *
      * @param angle
      * @return
      */
     public Matrix3f fromRotateX(float angle) {
         float sin = (float) Math.sin(angle);
         float cos = (float) Math.cos(angle);
-        
-        m00 = 1; m11 = 0;   m12 = 0;
-        m10 = 0; m11 = cos; m12 = -sin;
-        m20 = 0; m21 = sin; m22 = cos;
-        
+
+        m00 = 1;
+        m11 = 0;
+        m12 = 0;
+        m10 = 0;
+        m11 = cos;
+        m12 = -sin;
+        m20 = 0;
+        m21 = sin;
+        m22 = cos;
+
         return this;
     }
-    
+
     /**
      * 绕y轴旋转
+     *
      * @param angle
      * @return
      */
     public Matrix3f fromRotateY(float angle) {
         float sin = (float) Math.sin(angle);
         float cos = (float) Math.cos(angle);
-        
-        m00 = cos;  m11 = 0; m12 = sin;
-        m10 = 0;    m11 = 1; m12 = 0;
-        m20 = -sin; m21 = 0; m22 = cos;
-        
+
+        m00 = cos;
+        m11 = 0;
+        m12 = sin;
+        m10 = 0;
+        m11 = 1;
+        m12 = 0;
+        m20 = -sin;
+        m21 = 0;
+        m22 = cos;
+
         return this;
     }
-    
+
     /**
      * 绕z轴旋转
+     *
      * @param angle
      * @return
      */
     public Matrix3f fromRotateZ(float angle) {
         float sin = (float) Math.sin(angle);
         float cos = (float) Math.cos(angle);
-        
-        m00 = cos; m11 = -sin; m12 = 0;
-        m10 = sin; m11 = cos;  m12 = 0;
-        m20 = 0;   m21 = 0;    m22 = 1;
-        
+
+        m00 = cos;
+        m11 = -sin;
+        m12 = 0;
+        m10 = sin;
+        m11 = cos;
+        m12 = 0;
+        m20 = 0;
+        m21 = 0;
+        m22 = 1;
+
         return this;
     }
-    
+
     /**
      * 欧拉角旋转
+     *
      * @param xAngle
      * @param yAngle
      * @param zAngle
@@ -457,13 +508,14 @@ public class Matrix3f {
         Matrix3f rotateX = new Matrix3f().fromRotateX(xAngle);
         Matrix3f rotateY = new Matrix3f().fromRotateY(yAngle);
         Matrix3f rotateZ = new Matrix3f().fromRotateZ(zAngle);
-        
+
         Matrix3f result = rotateZ.mult(rotateY).mult(rotateX);
         return result;
     }
-    
+
     /**
      * 轴角对旋转矩阵
+     *
      * @param v
      * @param angle
      * @return
@@ -471,9 +523,10 @@ public class Matrix3f {
     public Matrix3f fromAxisAngle(Vector3f v, float angle) {
         return fromAxisAngle(v.x, v.y, v.z, angle);
     }
-    
+
     /**
      * 轴角对旋转矩阵。
+     *
      * @param vx
      * @param vy
      * @param vz
@@ -482,12 +535,12 @@ public class Matrix3f {
      */
     public Matrix3f fromAxisAngle(float vx, float vy, float vz, float angle) {
         zero();
-        
+
         float length = vx * vx + vy * vy + vz * vz;
         if (length == 0) {
             return this;
         }
-        
+
         // 先把向量规范化
         if (Math.abs(length - 1.0) > 0.0001) {
             length = (float) (1.0 / Math.sqrt(length));
@@ -495,10 +548,10 @@ public class Matrix3f {
             vy *= length;
             vz *= length;
         }
-        
+
         float sin = (float) Math.sin(angle);
         float cos = (float) Math.cos(angle);
-        
+
         // 节省5次减法运算
         float _1_minus_cos = 1f - cos;
 
@@ -506,12 +559,12 @@ public class Matrix3f {
         float xSin = vx * sin;
         float ySin = vy * sin;
         float zSin = vz * sin;
-        
+
         // 节省6次乘法运算
         float xyM = vx * vy * _1_minus_cos;
         float xzM = vx * vz * _1_minus_cos;
         float yzM = vy * vz * _1_minus_cos;
-        
+
         m00 = vx * vx * _1_minus_cos + cos;
         m01 = xyM - zSin;
         m02 = xzM + ySin;
@@ -524,23 +577,31 @@ public class Matrix3f {
 
         return this;
     }
-    
+
     /**
      * 使用3个基底向量来初始化矩阵
+     *
      * @param xAxis
      * @param yAxis
      * @param zAxis
      * @return
      */
     public Matrix3f fromAxis(Vector3f xAxis, Vector3f yAxis, Vector3f zAxis) {
-        m00 = xAxis.x; m01 = yAxis.x; m02 = zAxis.x;
-        m10 = xAxis.y; m11 = yAxis.y; m12 = zAxis.y;
-        m20 = xAxis.z; m21 = yAxis.z; m22 = zAxis.z;
+        m00 = xAxis.x;
+        m01 = yAxis.x;
+        m02 = zAxis.x;
+        m10 = xAxis.y;
+        m11 = yAxis.y;
+        m12 = zAxis.y;
+        m20 = xAxis.z;
+        m21 = yAxis.z;
+        m22 = zAxis.z;
         return this;
     }
-    
+
     /**
      * 将矩阵的三个基底坐标保存到3个向量中。
+     *
      * @param xAxis
      * @param yAxis
      * @param zAxis

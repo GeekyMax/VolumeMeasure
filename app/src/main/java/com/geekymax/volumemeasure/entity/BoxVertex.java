@@ -6,7 +6,7 @@ import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.Renderable;
 
 public class BoxVertex {
-    private AnchorNode anchorNode;
+    private Node parent;
     private Node node;
 
     private Vector3 position;
@@ -17,9 +17,9 @@ public class BoxVertex {
     public boolean y;
     public boolean z;
 
-    public BoxVertex(Vector3 position, AnchorNode anchorNode, Renderable renderable) {
+    public BoxVertex(Vector3 position, Node parent, Renderable renderable) {
         this.position = position;
-        this.anchorNode = anchorNode;
+        this.parent = parent;
         this.renderable = renderable;
     }
 
@@ -28,7 +28,7 @@ public class BoxVertex {
             node = new Node();
             node.setRenderable(renderable);
         }
-        node.setParent(anchorNode);
+        node.setParent(parent);
         node.setLocalPosition(position);
     }
 
