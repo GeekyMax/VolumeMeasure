@@ -23,6 +23,7 @@ import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -33,7 +34,9 @@ import com.geekymax.volumemeasure.entity.BoxEdge;
 import com.geekymax.volumemeasure.entity.BoxFace;
 import com.geekymax.volumemeasure.entity.BoxVertex;
 import com.geekymax.volumemeasure.entity.OnSceneUpdateListener;
+import com.geekymax.volumemeasure.manager.BoxManager;
 import com.geekymax.volumemeasure.manager.MaterialManager;
+import com.google.android.filament.Box;
 import com.google.ar.core.Anchor;
 import com.google.ar.core.Frame;
 import com.google.ar.core.HitResult;
@@ -72,12 +75,8 @@ public class MainActivity extends AppCompatActivity implements OnSceneUpdateList
     // 控件
     private ImageView translucenceDown;
     private CircleButton measureButton;
-
-    // 已渲染的图形对象
-    List<Vector3> locations = new ArrayList<>();
-    List<BoxVertex> boxVertices = new ArrayList<>();
-    List<BoxEdge> boxEdges = new ArrayList<>();
-    List<BoxFace> boxFaces = new ArrayList<>();
+    private ImageButton testButton;
+    private ImageButton refreshButton;
 
     // anchor 和parent
     AnchorNode anchorNode;
@@ -85,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements OnSceneUpdateList
 
     // manager
     MaterialManager materialManager;
+    BoxManager boxManager;
 
     @Override
     @SuppressWarnings({"AndroidApiChecker", "FutureReturnValueIgnored"})
@@ -102,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements OnSceneUpdateList
         arFragment.setOnUpdateListener(this);
         arFragment.getArSceneView().getPlaneRenderer().setShadowReceiver(false);
         materialManager = MaterialManager.getInstance(this);
+        boxManager = BoxManager.getInstance(this);
         findWidget();
     }
 
@@ -169,8 +170,12 @@ public class MainActivity extends AppCompatActivity implements OnSceneUpdateList
     private void findWidget() {
         translucenceDown = findViewById(R.id.down);
         measureButton = findViewById(R.id.measure_btn);
+        testButton = findViewById(R.id.test_btn);
+        refreshButton = findViewById(R.id.refresh_btn);
         measureButton.setVisibility(View.INVISIBLE);
         translucenceDown.setVisibility(View.INVISIBLE);
+        testButton.setVisibility(View.INVISIBLE);
+        refreshButton.setVisibility(View.INVISIBLE);
         measureButton.setOnClickListener(v -> {
             if (arState != ArState.READY) {
                 return;
@@ -192,12 +197,24 @@ public class MainActivity extends AppCompatActivity implements OnSceneUpdateList
                     rootNode = new Node();
                     rootNode.setParent(anchorNode);
                     rootNode.setLocalRotation(Quaternion.axisAngle(new Vector3(0, 1, 0), 30));
-                    drawBox(rootNode, 0.2f, 0.4f, 0.3f);
+                    boxManager.drawBox(rootNode, 0.2f, 0.4f, 0.3f);
                     arState = ArState.DONE;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        });
+        testButton.setOnClickListener(v -> {
+            if (arState != ArState.DONE) {
+                return;
+            }
+            boxManager.moveFace(0.1f);
+        });
+        refreshButton.setOnClickListener(v -> {
+            if (arState != ArState.DONE) {
+                return;
+            }
+            boxManager.moveFace(-0.1f);
         });
     }
 
@@ -205,111 +222,15 @@ public class MainActivity extends AppCompatActivity implements OnSceneUpdateList
         if (available) {
             measureButton.setVisibility(View.VISIBLE);
             translucenceDown.setVisibility(View.VISIBLE);
+            testButton.setVisibility(View.VISIBLE);
+            refreshButton.setVisibility(View.VISIBLE);
         } else {
             measureButton.setVisibility(View.INVISIBLE);
             translucenceDown.setVisibility(View.INVISIBLE);
+            testButton.setVisibility(View.INVISIBLE);
+            refreshButton.setVisibility(View.INVISIBLE);
         }
     }
 
-    private void drawBox(Node parent, float a, float b, float h) {
-        clearBox();
-        for (float i = 0; i <= 1; i++) {
-            for (float j = 0; j <= 1; j++) {
-                for (float k = 0; k <= 1; k++) {
-                    locations.add(new Vector3((i - 1 / 2f) * a, h * (j - 1 / 2f), (k - 1 / 2f) * b));
-                }
-            }
-        }
-        ModelRenderable sphere = ShapeFactory.makeSphere(0.01f, new Vector3(0.0f, 0.0f, 0.0f), MaterialManager.getInstance().getMaterial(MaterialManager.MATERIAL_VERTEX_DEFAULT));
-        sphere.setShadowCaster(false);
-        sphere.setShadowReceiver(false);
-        locations.forEach(loc -> {
-            BoxVertex boxVertex = new BoxVertex(loc, parent, sphere);
-            boxVertices.add(boxVertex);
-            boxVertex.update();
-        });
-        for (int i = 0; i < boxVertices.size(); i++) {
-            for (int j = 0; j < boxVertices.size(); j++) {
-                Log.d(TAG, "drawBox: boxEdge: " + i + " " + j + ":" + isEdge(i, j));
-                if (isEdge(i, j)) {
-                    BoxEdge boxEdge = new BoxEdge(boxVertices.get(i), boxVertices.get(j), parent, MaterialManager.getInstance().getMaterial(MaterialManager.MATERIAL_EDGE_DEFAULT));
-                    boxEdges.add(boxEdge);
-                    boxEdge.update();
-                }
-            }
-        }
-
-        for (int i = 0; i < boxVertices.size(); i++) {
-            for (int j = 0; j < boxVertices.size(); j++) {
-                for (int k = 0; k < boxVertices.size(); k++) {
-                    for (int l = 0; l < boxVertices.size(); l++) {
-                        if (isFace(i, j, k, l)) {
-                            BoxFace boxFace = new BoxFace(parent, MaterialManager.getInstance().getMaterial(MaterialManager.MATERIAL_FACE_DEFAULT));
-                            boxFace.addVertex(boxVertices.get(i));
-                            boxFace.addVertex(boxVertices.get(j));
-                            boxFace.addVertex(boxVertices.get(l));
-                            boxFace.addVertex(boxVertices.get(k));
-                            boxFaces.add(boxFace);
-                            boxFace.update();
-
-                        }
-                    }
-                }
-            }
-        }
-
-
-    }
-
-    private void clearBox() {
-        boxVertices.clear();
-        boxEdges.clear();
-        boxFaces.clear();
-    }
-
-    private boolean isEdge(int i, int j) {
-        if (i <= j) {
-            return false;
-        }
-        int i3 = i % 2;
-        i = i / 2;
-        int i2 = i % 2;
-        i = i / 2;
-        int i1 = i % 2;
-        int j3 = j % 2;
-        j = j / 2;
-        int j2 = j % 2;
-        j = j / 2;
-        int j1 = j % 2;
-        return i1 == j1 && i2 == j2 || i1 == j1 && i3 == j3 || i3 == j3 && i2 == j2;
-    }
-
-    private boolean isFace(int i, int j, int k, int l) {
-        if (!(i > j && j > k && k > l)) {
-            return false;
-        }
-        int i3 = i % 2;
-        i = i / 2;
-        int i2 = i % 2;
-        i = i / 2;
-        int i1 = i % 2;
-        int j3 = j % 2;
-        j = j / 2;
-        int j2 = j % 2;
-        j = j / 2;
-        int j1 = j % 2;
-        int k3 = k % 2;
-        k = k / 2;
-        int k2 = k % 2;
-        k = k / 2;
-        int k1 = k % 2;
-        int l3 = l % 2;
-        l = l / 2;
-        int l2 = l % 2;
-        l = l / 2;
-        int l1 = l % 2;
-        return i1 == j1 && j1 == k1 && k1 == l1 || i2 == j2 && j2 == k2 && k2 == l2 || i3 == j3 && j3 == k3 && k3 == l3;
-
-    }
 
 }

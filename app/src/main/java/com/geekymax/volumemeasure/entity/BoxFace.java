@@ -2,6 +2,7 @@ package com.geekymax.volumemeasure.entity;
 
 import android.util.Log;
 
+import com.geekymax.volumemeasure.manager.BoxManager;
 import com.geekymax.volumemeasure.manager.MaterialManager;
 import com.geekymax.volumemeasure.math.Matrix3f;
 import com.geekymax.volumemeasure.util.MathUtil;
@@ -25,6 +26,7 @@ public class BoxFace {
 
     private Matrix3f rotationMatrix;
     private static final float faceThickness = 0.005f;
+    private Vector3 normal;
 
     public BoxFace(Node parent, Material material) {
         this.parent = parent;
@@ -32,20 +34,14 @@ public class BoxFace {
         this.vertices = new ArrayList<>();
     }
 
-    public BoxFace(Node parent, List<BoxVertex> vertices, Material material) {
-        this.parent = parent;
-        this.vertices = vertices;
-        this.material = material;
-
-    }
 
     public void update() {
         if (node == null) {
             node = new Node();
             node.setOnTapListener((hitTestResult, motionEvent) -> {
                 Log.d(TAG, "update: hitTestResult:" + hitTestResult + "; motionEvent:" + motionEvent);
-                this.material = MaterialManager.getInstance().getMaterial(MaterialManager.MATERIAL_FACE_SELECTED);
-                update();
+                // 将当前已选择的面设置为自己
+                BoxManager.getInstance().setSelectedFace(this);
             });
         }
         Vector3 firstPos = vertices.get(0).getPosition();
@@ -56,7 +52,7 @@ public class BoxFace {
         Log.d(TAG, "update: V1:" + v1 + ";V2:" + v2);
         float length1 = v1.length();
         float length2 = v2.length();
-        Vector3 normal = MathUtil.getNormal(firstPos, secondPos, thirdPos);
+        normal = MathUtil.getNormal(firstPos, secondPos, thirdPos);
         rotationMatrix = MathUtil.getRotationMatrix(v1.normalized(), normal, v2.normalized());
         Log.d(TAG, "update: rotationMatrix:" + rotationMatrix);
         Quaternion rotation = MathUtil.rotationMatrixToQuaternion(rotationMatrix);
@@ -72,15 +68,19 @@ public class BoxFace {
     }
 
     public void addVertex(BoxVertex v) {
+        v.addRelativeFace(this);
         this.vertices.add(v);
     }
 
-    public Vector3 transformFrom(Vector3 v) {
-        return rotationMatrix.mult(v);
+    public void setMaterial(Material material) {
+        this.material = material;
     }
 
-    public Vector3 transformTo(Vector3 v) {
-        return rotationMatrix.invert().mult(v);
+    public Vector3 getNormal() {
+        return normal;
     }
 
+    public List<BoxVertex> getVertices() {
+        return vertices;
+    }
 }

@@ -41,13 +41,11 @@ public class MathUtil {
         Matrix3f ma = new Matrix3f(v11.x, v11.y, v11.z, v12.x, v12.y, v12.z, v13.x, v13.y, v13.z);
         Matrix3f mb = new Matrix3f(v21.x, v21.y, v21.z, v22.x, v22.y, v22.z, v23.x, v23.y, v23.z);
         Matrix3f inverseMb = mb.invert();
-        Matrix3f r = ma.mult(inverseMb);
-        return r;
+        return ma.mult(inverseMb);
     }
 
     private static Quaternion arQuaternion(com.geekymax.volumemeasure.math.Quaternion q) {
         return new Quaternion(q.x, q.y, q.z, q.w);
     }
-
 
 }
