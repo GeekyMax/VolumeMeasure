@@ -61,4 +61,11 @@ public class BoxVertex {
     public void addRelativeFace(BoxFace f) {
         this.relativeFaces.add(f);
     }
+
+    public void clear() {
+        if (this.node != null) {
+            this.node.setParent(null);
+            this.node.setEnabled(false);
+        }
+    }
 }

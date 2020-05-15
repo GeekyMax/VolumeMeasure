@@ -18,6 +18,8 @@ package com.geekymax.volumemeasure;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
@@ -25,9 +27,11 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import com.geekymax.volumemeasure.manager.StateController;
-import com.google.ar.core.Session;
+
+import org.nd4j.linalg.factory.Nd4j;
 
 
 /**
@@ -51,6 +55,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         stateController = new StateController();
         stateController.initWidget(this);
+        verifyStoragePermissions(this);
+        // 起一个线程初次调用ND4j以用于加载ND4j库,否则初次运行会耗时
+//        AsyncTask.execute(Nd4j::empty);
+        new Thread(Nd4j::empty).run();
     }
 
     @Override
@@ -88,5 +96,32 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            "android.permission.READ_EXTERNAL_STORAGE",
+            "android.permission.WRITE_EXTERNAL_STORAGE"};
+
+
+    public static void verifyStoragePermissions(Activity activity) {
+
+        try {
+            //检测是否有写的权限
+            int permission = ActivityCompat.checkSelfPermission(activity,
+                    "android.permission.WRITE_EXTERNAL_STORAGE");
+            if (permission != PackageManager.PERMISSION_GRANTED) {
+                // 没有写的权限，去申请写的权限，会弹出对话框
+                ActivityCompat.requestPermissions(activity, PERMISSIONS_STORAGE, REQUEST_EXTERNAL_STORAGE);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (stateController.onBackPressed()) {
+            super.onBackPressed();
+        }
+    }
 
 }

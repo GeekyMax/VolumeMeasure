@@ -83,4 +83,11 @@ public class BoxFace {
     public List<BoxVertex> getVertices() {
         return vertices;
     }
+    public void clear() {
+        if (this.node != null) {
+            this.node.setParent(null);
+            this.node.setEnabled(false);
+        }
+
+    }
 }

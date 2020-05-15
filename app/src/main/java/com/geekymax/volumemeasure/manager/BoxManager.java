@@ -2,17 +2,22 @@ package com.geekymax.volumemeasure.manager;
 
 import android.content.Context;
 import android.util.Log;
+import android.view.View;
 
 import com.geekymax.volumemeasure.entity.BoxEdge;
 import com.geekymax.volumemeasure.entity.BoxFace;
 import com.geekymax.volumemeasure.entity.BoxVertex;
+import com.geekymax.volumemeasure.measurer.MeasureBundle;
 import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.ShapeFactory;
 
+import org.datavec.api.transform.analysis.counter.StatCounter;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 体积盒AR显示管理器
@@ -31,15 +36,22 @@ public class BoxManager {
 
     // 当前选择的面
     private BoxFace selectedFace;
+    private MeasureBundle measureBundle;
 
-    private BoxManager(Context context) {
+    private boolean showArLabel = false;
+
+    private StateController stateController;
+
+    private BoxManager(Context context, StateController stateController) {
         this.context = context;
+        this.stateController = stateController;
     }
 
-    public static BoxManager getInstance(Context context) {
+
+    public static BoxManager getInstance(Context context, StateController stateController) {
         synchronized (INSTANCE_LOCK) {
             if (instance == null) {
-                instance = new BoxManager(context);
+                instance = new BoxManager(context, stateController);
             }
             return instance;
         }
@@ -49,12 +61,15 @@ public class BoxManager {
         return instance;
     }
 
-    public void drawBox(Node parent, float a, float b, float h) {
+    public void drawBox(Node parent, MeasureBundle measureBundle) {
+
+        this.measureBundle = measureBundle;
+        Vector3 size = measureBundle.getLength();
         clearBox();
         for (float i = 0; i <= 1; i++) {
             for (float j = 0; j <= 1; j++) {
                 for (float k = 0; k <= 1; k++) {
-                    locations.add(new Vector3((i - 1 / 2f) * a, h * (j - 1 / 2f), (k - 1 / 2f) * b));
+                    locations.add(new Vector3((i - 1 / 2f) * size.x, size.y * (j - 1 / 2f), (k - 1 / 2f) * size.z));
                 }
             }
         }
@@ -62,7 +77,7 @@ public class BoxManager {
             BoxVertex boxVertex = new BoxVertex(loc, parent, MaterialManager.getInstance().getMaterial(MaterialManager.MATERIAL_VERTEX_DEFAULT));
             boxVertices.add(boxVertex);
         });
-
+        showArLabel = SettingManager.getInstance().isShowARLabel(context);
         int[][] faceVerticesArray = getFaceVertexList();
         for (int[] faceVertices : faceVerticesArray) {
             BoxFace boxFace = new BoxFace(parent, MaterialManager.getInstance().getMaterial(MaterialManager.MATERIAL_FACE_DEFAULT));
@@ -71,6 +86,7 @@ public class BoxManager {
             }
             boxFaces.add(boxFace);
         }
+
         for (int i = 0; i < boxVertices.size(); i++) {
             for (int j = 0; j < boxVertices.size(); j++) {
                 if (isEdge(i, j)) {
@@ -86,6 +102,7 @@ public class BoxManager {
                 }
             }
         }
+
         boxVertices.forEach(BoxVertex::update);
 
     }
@@ -132,19 +149,33 @@ public class BoxManager {
     }
 
     public void setSelectedFace(BoxFace selectedFace) {
-        this.selectedFace = selectedFace;
+
         boxFaces.forEach(boxFace -> boxFace.setMaterial(MaterialManager.getInstance().getMaterial(MaterialManager.MATERIAL_FACE_DEFAULT)));
-        selectedFace.setMaterial(MaterialManager.getInstance().getMaterial(MaterialManager.MATERIAL_FACE_SELECTED));
+        if (this.selectedFace == selectedFace) {
+            this.selectedFace = null;
+            selectedFace.setMaterial(MaterialManager.getInstance().getMaterial(MaterialManager.MATERIAL_FACE_DEFAULT));
+            stateController.showSlideView(View.INVISIBLE);
+        } else {
+            this.selectedFace = selectedFace;
+            selectedFace.setMaterial(MaterialManager.getInstance().getMaterial(MaterialManager.MATERIAL_FACE_SELECTED));
+            stateController.showSlideView(View.VISIBLE);
+
+        }
         boxFaces.forEach(BoxFace::update);
     }
 
     // 移动Face,以"向外"为正方向
     public void moveFace(float distance) {
+        showArLabel = SettingManager.getInstance().isShowARLabel(context);
         if (selectedFace == null) {
             return;
         }
         Vector3 normal = selectedFace.getNormal();
+
         Vector3 diff = normal.scaled(distance);
+        if (distance > 0) {
+
+        }
         List<BoxVertex> vertices = selectedFace.getVertices();
         vertices.forEach(v -> {
             Vector3 pos = Vector3.add(v.getPosition(), diff);
@@ -152,5 +183,53 @@ public class BoxManager {
         });
         // 等所有pos更新完数据之后,才能更新显示
         vertices.forEach(BoxVertex::update);
+        updateMeasureBundle();
+    }
+
+    private void updateMeasureBundle() {
+        measureBundle.clear();
+        boxVertices.forEach(v -> {
+            Vector3 pos = v.getPosition();
+            if (pos.x < measureBundle.getMinX()) {
+                measureBundle.setMinX(pos.x);
+            } else if (pos.x > measureBundle.getMaxX()) {
+                measureBundle.setMaxX(pos.x);
+            }
+            if (pos.y < measureBundle.getMinY()) {
+                measureBundle.setMinY(pos.y);
+            } else if (pos.y > measureBundle.getMaxY()) {
+                measureBundle.setMaxY(pos.y);
+            }
+            if (pos.z < measureBundle.getMinZ()) {
+                measureBundle.setMinZ(pos.z);
+            } else if (pos.z > measureBundle.getMaxZ()) {
+                measureBundle.setMaxZ(pos.z);
+            }
+        });
+    }
+
+    /**
+     * 清除已有绘制
+     */
+    public void clear() {
+        this.boxEdges.forEach(BoxEdge::clear);
+        this.boxVertices.forEach(BoxVertex::clear);
+        this.boxFaces.forEach(BoxFace::clear);
+        this.boxEdges = new ArrayList<>();
+        this.boxFaces = new ArrayList<>();
+        this.boxVertices = new ArrayList<>();
+        this.locations = new ArrayList<>();
+        this.selectedFace = null;
+        this.measureBundle = null;
+        showArLabel = SettingManager.getInstance().isShowARLabel(context);
+        stateController.showSlideView(View.INVISIBLE);
+    }
+
+    public MeasureBundle getMeasureBundle() {
+        return measureBundle;
+    }
+
+    public boolean isShowArLabel() {
+        return showArLabel;
     }
 }

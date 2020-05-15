@@ -1,3 +1,30 @@
 <resources>
     <string name="app_name">VolumeMeasure</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Preference Titles -->
+    <string name="messages_header">Messages</string>
+    <string name="general_header">通用</string>
+    <string name="measure_header">测量</string>
+    <string name="theme_header">主题</string>
+    <string name="sync_header">Sync</string>
+    <!-- Messages Preferences -->
+    <string name="signature_title">Your signature</string>
+    <string name="reply_title">Default reply action</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+
+    <!--设置项目 标题-->
+    <string name="measurer_title">测量方式</string>
+    <string name="memory_title">自动记录测量历史</string>
+    <string name="theme_color_title">主题颜色</string>
+    <string name="them_simple_title">简洁模式</string>
+    <string name="measure_unit_title">数据单位</string>
+    <string name="show_ar_label_title">AR显示尺寸数据</string>
+    <string name="title_activity_history">HistoryActivity</string>
 </resources>

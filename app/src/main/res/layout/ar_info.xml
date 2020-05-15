@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
 
     <TextView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/planetInfoCard"
@@ -10,7 +10,7 @@
         android:layout_weight="1"
         android:gravity="center"
         android:orientation="vertical"
-        android:padding="6dp"
+        android:padding="0dp"
         android:text="Test"
         android:textAlignment="center" />
 </LinearLayout>

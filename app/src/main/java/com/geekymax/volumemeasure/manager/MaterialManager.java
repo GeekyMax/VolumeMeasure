@@ -2,12 +2,15 @@ package com.geekymax.volumemeasure.manager;
 
 import android.content.Context;
 
+import com.geekymax.volumemeasure.R;
 import com.google.ar.sceneform.rendering.Color;
 import com.google.ar.sceneform.rendering.Material;
 import com.google.ar.sceneform.rendering.MaterialFactory;
+import com.google.ar.sceneform.rendering.ViewRenderable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * AR材质管理器
@@ -62,5 +65,12 @@ public class MaterialManager {
 
     public Material getMaterial(String id) {
         return materialMap.get(id);
+    }
+
+    public void getArInfo(Consumer<? super ViewRenderable> action) {
+        ViewRenderable.builder()
+                .setView(context, R.layout.ar_info)
+                .build()
+                .thenAccept(action);
     }
 }

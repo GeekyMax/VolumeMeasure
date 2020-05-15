@@ -13,24 +13,78 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
 
-    <!--    <ImageView-->
-    <!--        android:id="@+id/center"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="0dp"-->
-    <!--        android:background="@color/transparent"-->
-    <!--        app:layout_constraintDimensionRatio="3:4"-->
-    <!--        app:layout_constraintTop_toTopOf="parent" />-->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/info_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/translucence"
+            android:padding="8dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:text="initial"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageButton
+            android:id="@+id/setting_btn"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_margin="16dp"
+            android:layout_marginEnd="8dp"
+            android:background="@color/transparent"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="8dp"
+            android:scaleType="fitCenter"
+            android:theme="@style/RippleWhite"
+            android:tint="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/setting" />
+
+        <ImageButton
+            android:id="@+id/history_btn"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_margin="16dp"
+            android:background="@color/transparent"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="8dp"
+            android:scaleType="fitCenter"
+            android:theme="@style/RippleWhite"
+            android:tint="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/history" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
     <ImageView
         android:id="@+id/down"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@color/translucence"
+        android:background="@color/black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintDimensionRatio="5:2"
         app:layout_constraintEnd_toEndOf="parent"
@@ -40,7 +94,7 @@
         app:layout_constraintVertical_bias="1.0" />
 
     <at.markushi.ui.CircleButton
-        android:id="@+id/measure_btn"
+        android:id="@+id/collect_btn"
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:background="@color/transparent"
@@ -55,6 +109,7 @@
         app:layout_constraintTop_toTopOf="@+id/down"
         tools:src="@drawable/add_line" />
 
+
     <ImageButton
         android:id="@+id/test_btn"
         android:layout_width="48dp"
@@ -64,43 +119,71 @@
         android:clickable="true"
         android:focusable="true"
         android:scaleType="fitCenter"
-        android:src="@drawable/package_line"
+        android:src="@drawable/screenshot"
         android:tint="@color/white"
-        app:layout_constraintBottom_toBottomOf="@+id/measure_btn"
+        app:layout_constraintBottom_toBottomOf="@+id/collect_btn"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/measure_btn" />
+        app:layout_constraintTop_toTopOf="@+id/collect_btn" />
 
     <ImageButton
         android:id="@+id/refresh_btn"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_marginStart="32dp"
         android:background="@color/transparent"
         android:clickable="true"
         android:focusable="true"
-        android:padding="8dp"
         android:scaleType="fitCenter"
         android:theme="@style/RippleWhite"
         android:tint="@color/white"
-        app:layout_constraintBottom_toBottomOf="@+id/measure_btn"
+        app:layout_constraintBottom_toBottomOf="@+id/collect_btn"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/measure_btn"
-        app:srcCompat="@drawable/refresh_line" />
+        app:layout_constraintTop_toTopOf="@+id/collect_btn"
+        app:srcCompat="@drawable/sync" />
 
-    <TextView
-        android:id="@+id/info_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/slide_view"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
         android:background="@color/translucence"
-        android:padding="8dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:text="initial"
-        android:textAlignment="center"
-        android:textColor="@color/white"
-        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/down"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:id="@+id/slide_icon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/slide"
+            android:tint="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="16dp"
+            android:src="@drawable/left_3"
+            android:tint="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="16dp"
+            android:src="@drawable/right_3"
+            android:tint="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,55 @@
+<resources>
+    <!-- Reply Preference -->
+    <string-array name="reply_entries">
+        <item>Reply</item>
+        <item>Reply to all</item>
+    </string-array>
+
+    <string-array name="reply_values">
+        <item>reply</item>
+        <item>reply_all</item>
+    </string-array>
+    <string-array name="measurer_entries">
+        <item>默认</item>
+        <item>离线测量</item>
+        <item>在线测量</item>
+    </string-array>
+    <string-array name="measurer_values">
+        <item>default</item>
+        <item>offline</item>
+        <item>online</item>
+    </string-array>
+    <string-array name="theme_color_entries">
+        <item>默认</item>
+        <item>黑色</item>
+        <item>红色</item>
+        <item>黄色</item>
+        <item>蓝色</item>
+        <item>绿色</item>
+    </string-array>
+    <string-array name="theme_color_values">
+        <item>default</item>
+        <item>black</item>
+        <item>red</item>
+        <item>yellow</item>
+        <item>blue</item>
+        <item>green</item>
+    </string-array>
+
+    <string-array name="measure_unit_entries">
+        <item>厘米</item>
+        <item>米</item>
+        <item>市寸</item>
+        <item>市尺</item>
+        <item>英寸</item>
+        <item>英尺</item>
+    </string-array>
+    <string-array name="measure_unit_values">
+        <item>cm</item>
+        <item>m</item>
+        <item>cun</item>
+        <item>chi</item>
+        <item>inch</item>
+        <item>foot</item>
+    </string-array>
+</resources>
