@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.geekymax.volumemeasure.entity.MyPoint;
 import com.geekymax.volumemeasure.manager.NetManager;
+import com.geekymax.volumemeasure.manager.SettingManager;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
@@ -27,7 +28,6 @@ import okhttp3.Response;
 
 public class OnlineMeasurer implements Measurer {
     private OkHttpClient client;
-    private String url = "";
 
 
     public OnlineMeasurer() {
@@ -36,6 +36,7 @@ public class OnlineMeasurer implements Measurer {
 
     @Override
     public void measure(INDArray pointData, double underHeight, MeasureCallback callback) {
+        String url = SettingManager.getInstance().getMeasurerWebhookUrl();
         MediaType JSON = MediaType.parse("application/json; charset=utf-8");
         JSONObject json = new JSONObject();
         try {

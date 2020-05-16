@@ -52,4 +52,15 @@
         <item>inch</item>
         <item>foot</item>
     </string-array>
+
+    <string-array name="language_entries">
+        <item>中文</item>
+        <item>英文</item>
+
+    </string-array>
+    <string-array name="language_values">
+        <item>chinese</item>
+        <item>english</item>
+
+    </string-array>
 </resources>

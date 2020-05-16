@@ -33,8 +33,8 @@ public class HistorySwipeAdapter extends RecyclerSwipeAdapter<HistorySwipeAdapte
         TextView textSize;
         TextView textId;
         ImageView imageView;
-        ImageView trash;
-        ImageView share;
+        View trash;
+        View share;
         Record record;
         View surfaceView;
 
@@ -49,7 +49,6 @@ public class HistorySwipeAdapter extends RecyclerSwipeAdapter<HistorySwipeAdapte
             share = itemView.findViewById(R.id.share);
             surfaceView = itemView.findViewById(R.id.surface_wrapper);
             View popView = LayoutInflater.from(itemView.getContext()).inflate(R.layout.size_popup, null);
-            Button ok = popView.findViewById(R.id.ok_btn);
 
         }
 

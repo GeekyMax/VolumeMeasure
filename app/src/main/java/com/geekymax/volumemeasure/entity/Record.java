@@ -70,4 +70,7 @@ public class Record {
         return String.format("%s:%s:%f,%f,%f", uid, sdf.format(date), x, y, z);
     }
 
+    public float getVolume() {
+        return this.x * this.y * this.z;
+    }
 }

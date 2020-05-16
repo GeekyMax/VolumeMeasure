@@ -71,7 +71,8 @@ public class StateController implements OnSceneUpdateListener {
     private MaterialManager materialManager;
     private MeasureManager measureManager;
     private HistoryManager historyManager;
-
+    private FileManager fileManager;
+    private SettingManager settingManager;
     private MeasureBundle measureBundle;
     // 主活动
     private AppCompatActivity activity;
@@ -138,6 +139,7 @@ public class StateController implements OnSceneUpdateListener {
         this.arState = ArState.READY;
         BoxManager.getInstance().clear();
         showText("ready");
+        MeasureManager.getInstance(activity).clear();
     }
 
     // 每帧更新时调用
@@ -199,6 +201,9 @@ public class StateController implements OnSceneUpdateListener {
         boxManager = BoxManager.getInstance(activity, this);
         measureManager = MeasureManager.getInstance(activity);
         historyManager = HistoryManager.getInstance(activity);
+        fileManager = FileManager.getInstance().init(activity);
+        settingManager = SettingManager.getInstance();
+        settingManager.setContext(activity);
         setArState(ArState.INITIAL);
         // 获取Fragment
         arFragment = (MyArFragment) activity.getSupportFragmentManager().findFragmentById(R.id.ar_fragment);
@@ -228,10 +233,7 @@ public class StateController implements OnSceneUpdateListener {
             saveSnapshot();
         });
         refreshButton.setOnClickListener(v -> {
-            if (arState != ArState.DONE) {
-                return;
-            }
-            boxManager.moveFace(-0.1f);
+            restart();
         });
         settingButton.setOnClickListener(v -> {
             Intent intent = new Intent(activity, SettingsActivity.class);

@@ -1,5 +1,6 @@
 package com.geekymax.volumemeasure.manager;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
@@ -7,9 +8,12 @@ import android.util.Log;
 
 import com.geekymax.volumemeasure.entity.MyPoint;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.util.Map;
 
@@ -17,13 +21,19 @@ public class FileManager {
     private static final String TAG = "Geeky-FileManager";
     private static final String imageFilePath = "/sdcard/";
 
-    private FileManager instance;
+    private static FileManager instance;
+    private Activity activity;
 
-    public FileManager getInstance() {
+    public static FileManager getInstance() {
         if (instance == null) {
             instance = new FileManager();
         }
         return instance;
+    }
+
+    public FileManager init(Activity activity) {
+        this.activity = activity;
+        return this;
     }
 
     private FileManager() {
@@ -133,6 +143,7 @@ public class FileManager {
         }
         return file;
     }
+
     /**
      * Bitmap转换成byte[]并且进行压缩,压缩到不大于maxkb
      *
@@ -150,12 +161,46 @@ public class FileManager {
         }
         // 传值 byte 大于200*1024就会报错
         if (options == 10 && output.toByteArray().length > 200000) {
-            while (output.toByteArray().length > 200000&& options != 1) {
+            while (output.toByteArray().length > 200000 && options != 1) {
                 output.reset(); //清空output
                 bitmap.compress(Bitmap.CompressFormat.JPEG, options, output);//这里压缩options%，把压缩后的数据存放到output中
                 options -= 1;
             }
         }
         return output.toByteArray();
+    }
+
+    /**
+     * 从assets中读取txt
+     */
+    public String readFromAssets(String fileName) {
+        try {
+            InputStream is = activity.getAssets().open(fileName);
+            String text = readTextFromSDcard(is);
+            return text;
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 按行读取txt
+     *
+     * @param is
+     * @return
+     * @throws Exception
+     */
+    private String readTextFromSDcard(InputStream is) throws Exception {
+        InputStreamReader reader = new InputStreamReader(is);
+        BufferedReader bufferedReader = new BufferedReader(reader);
+        StringBuffer buffer = new StringBuffer("");
+        String str;
+        while ((str = bufferedReader.readLine()) != null) {
+            buffer.append(str);
+            buffer.append("\n");
+        }
+        return buffer.toString();
     }
 }

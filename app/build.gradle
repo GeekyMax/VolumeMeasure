@@ -83,15 +83,15 @@ dependencies {
     implementation "androidx.room:room-runtime:2.2.5"
     annotationProcessor "androidx.room:room-compiler:2.2.5"
     // 滑动删除控件
-    compile 'com.baoyz.swipemenulistview:library:1.3.0'
+    implementation 'com.baoyz.swipemenulistview:library:1.3.0'
 
-    compile "com.daimajia.swipelayout:library:1.2.0@aar"
-    compile 'com.daimajia.easing:library:2.0@aar'
-    compile 'com.daimajia.androidanimations:library:2.3@aar'
+    implementation "com.daimajia.swipelayout:library:1.2.0@aar"
+    implementation 'com.daimajia.easing:library:2.0@aar'
+    implementation 'com.daimajia.androidanimations:library:2.3@aar'
 
     // https://github.com/Meetic/MaryPopup
-    compile 'com.meetic.marypopup:marypopup:1.0.0'
-    compile 'com.meetic.dragueur:dragueur:1.0.3'
+    implementation 'com.meetic.marypopup:marypopup:1.0.0'
+    implementation 'com.meetic.dragueur:dragueur:1.0.3'
 }
 
 

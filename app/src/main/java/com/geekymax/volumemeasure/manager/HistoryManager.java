@@ -8,26 +8,43 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.PixelCopy;
 import android.view.SurfaceView;
+import android.widget.Toast;
 
 import androidx.room.Room;
 
 import com.geekymax.volumemeasure.entity.Record;
 import com.google.ar.sceneform.math.Vector3;
 
+import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.math.plot.utils.Array;
+
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class HistoryManager {
     private static final String TAG = "Geeky-HistoryManager";
     private static HistoryManager historyManager;
     private AppDatabase db;
     private Context context;
+    private OkHttpClient client;
 
     private HistoryManager(Context context) {
         this.context = context;
         db = Room.databaseBuilder(context.getApplicationContext(),
                 AppDatabase.class, "measure2.db").build();
+        client = new OkHttpClient();
     }
 
     public static HistoryManager getInstance(Context context) {
@@ -48,10 +65,12 @@ public class HistoryManager {
         AsyncTask.execute(() -> {
             db.recordDao().insert(record);
         });
+
         Bitmap bitmap = Bitmap.createBitmap(surfaceView.getDrawingCache());
         PixelCopy.request(surfaceView, bitmap, copyResult -> {
             FileManager.outputBitmap(id, bitmap);
         }, new Handler());
+        upload(record);
     }
 
     public void getAllRecord(Consumer<List<Record>> action) {
@@ -84,6 +103,49 @@ public class HistoryManager {
             List<Record> records = db.recordDao().getAll();
             db.recordDao().deleteAll(records);
         });
-
     }
+
+
+    public void upload(Record record) {
+        if (SettingManager.getInstance().isUpload(context)) {
+            String webhookUrl = SettingManager.getInstance().getWebhookUrl(context);
+            if (webhookUrl.equals("")) {
+                return;
+            }
+            // 开始开启子线程异步上传记录
+            AsyncTask.execute(() -> {
+                MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+                JSONObject json = new JSONObject();
+                try {
+                    json.put("name", record.name);
+                    json.put("x", record.x);
+                    json.put("y", record.y);
+                    json.put("z", record.y);
+                    json.put("volume", record.getVolume());
+                    json.put("date", record.date);
+                    json.put("uid", record.uid);
+                    RequestBody requestBody = RequestBody.create(JSON, String.valueOf(json));
+                    Request request = new Request.Builder()
+                            .post(requestBody)
+                            .url(webhookUrl)
+                            .build();
+                    client.newCall(request).enqueue(new Callback() {
+                        @Override
+                        public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                            e.printStackTrace();
+                            Toast.makeText(context, "上传发生错误!请检查设置", Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+
+        }
+    }
+
 }

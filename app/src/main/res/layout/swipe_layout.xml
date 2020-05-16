@@ -24,12 +24,12 @@
             android:weightSum="1">
             <!--What you want to show-->
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/share"
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
                 android:background="@color/qmui_config_color_blue">
 
                 <ImageView
-                    android:id="@+id/share"
                     android:layout_width="32dp"
                     android:layout_height="32dp"
                     android:src="@drawable/share"
@@ -41,12 +41,12 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/trash"
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
                 android:background="@color/qmui_config_color_red">
 
                 <ImageView
-                    android:id="@+id/trash"
                     android:layout_width="32dp"
                     android:layout_height="32dp"
                     android:src="@drawable/trash_1"

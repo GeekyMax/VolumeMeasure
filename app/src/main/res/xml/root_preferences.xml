@@ -33,10 +33,12 @@
             app:key="measurer"
             app:title="@string/measurer_title"
             app:useSimpleSummaryProvider="true" />
-        <SwitchPreferenceCompat
-            android:defaultValue="false"
-            app:key="memory"
-            app:title="@string/memory_title" />
+        <EditTextPreference
+            android:defaultValue="@string/default_measurer_url"
+            app:key="measurer_webhook"
+            app:title="@string/measurer_webhook_title"
+            app:useSimpleSummaryProvider="true" />
+
 
     </PreferenceCategory>
     <PreferenceCategory app:title="@string/theme_header">
@@ -47,40 +49,46 @@
             app:key="them_color"
             app:title="@string/theme_color_title"
             app:useSimpleSummaryProvider="true" />
-        <SwitchPreferenceCompat
-            app:key="theme_simple"
-            app:title="@string/them_simple_title" />
-        <SwitchPreferenceCompat
-            app:key="show_ar_label"
-            app:title="@string/show_ar_label_title" />
+        <!--        <SwitchPreferenceCompat-->
+        <!--            app:key="theme_simple"-->
+        <!--            app:title="@string/them_simple_title" />-->
+        <ListPreference
+            app:defaultValue="chinese"
+            app:entries="@array/language_entries"
+            app:entryValues="@array/language_values"
+            app:key="language"
+            app:title="@string/language_title" />
+
     </PreferenceCategory>
 
-    <!--    <PreferenceCategory app:title="@string/theme_header">-->
 
+    <PreferenceCategory app:title="@string/history_header">
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            app:key="memory"
+            app:title="@string/memory_title" />
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            app:key="upload"
+            app:title="@string/upload_title" />
 
-    <!--        <EditTextPreference-->
-    <!--            app:key="signature"-->
-    <!--            app:title="@string/signature_title"-->
-    <!--            app:useSimpleSummaryProvider="true" />-->
+        <EditTextPreference
+            app:key="webhook"
+            app:title="@string/webhook_title"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
 
-    <!--        <ListPreference-->
-    <!--            app:defaultValue="reply"-->
-    <!--            app:entries="@array/reply_entries"-->
-    <!--            app:entryValues="@array/reply_values"-->
-    <!--            app:key="reply"-->
-    <!--            app:title="@string/reply_title"-->
-    <!--            app:useSimpleSummaryProvider="true" />-->
-    <!--        <SwitchPreferenceCompat-->
-    <!--            app:key="sync"-->
-    <!--            app:title="@string/sync_title" />-->
-
-    <!--        <SwitchPreferenceCompat-->
-    <!--            app:dependency="sync"-->
-    <!--            app:key="attachment"-->
-    <!--            app:summaryOff="@string/attachment_summary_off"-->
-    <!--            app:summaryOn="@string/attachment_summary_on"-->
-    <!--            app:title="@string/attachment_title" />-->
-
-    <!--    </PreferenceCategory>-->
+    <PreferenceCategory app:title="@string/more_header">
+        <Preference app:title="@string/help_title">
+            <intent
+                android:targetClass="com.geekymax.volumemeasure.HelpActivity"
+                android:targetPackage="com.geekymax.volumemeasure" />
+        </Preference>
+        <Preference app:title="@string/about_title">
+            <intent
+                android:targetClass="com.geekymax.volumemeasure.AboutActivity"
+                android:targetPackage="com.geekymax.volumemeasure" />
+        </Preference>
+    </PreferenceCategory>
 
 </PreferenceScreen>

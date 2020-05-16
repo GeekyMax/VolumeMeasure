@@ -190,4 +190,9 @@ public class MeasureManager {
             }
         }
     }
+
+    public void clear() {
+        collecting = false;
+        pointMap.clear();
+    }
 }
