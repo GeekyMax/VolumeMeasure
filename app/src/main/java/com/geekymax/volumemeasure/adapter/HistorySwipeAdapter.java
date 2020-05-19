@@ -1,11 +1,11 @@
 package com.geekymax.volumemeasure.adapter;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -16,7 +16,7 @@ import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
 import com.geekymax.volumemeasure.R;
 import com.geekymax.volumemeasure.entity.Record;
-import com.geekymax.volumemeasure.manager.HistoryManager;
+import com.geekymax.volumemeasure.manager.RecordManager;
 import com.meetic.marypopup.MaryPopup;
 
 import java.text.SimpleDateFormat;
@@ -31,36 +31,43 @@ public class HistorySwipeAdapter extends RecyclerSwipeAdapter<HistorySwipeAdapte
         SwipeLayout swipeLayout;
         TextView textName;
         TextView textSize;
-        TextView textId;
+        TextView textDate;
         ImageView imageView;
         View trash;
         View share;
         Record record;
         View surfaceView;
+        String name;
+        Context context;
 
         public SimpleViewHolder(View itemView) {
             super(itemView);
             swipeLayout = itemView.findViewById(R.id.swipe_layout);
             textSize = itemView.findViewById(R.id.item_size);
-            textId = itemView.findViewById(R.id.item_id);
+            textDate = itemView.findViewById(R.id.item_date);
             textName = itemView.findViewById(R.id.item_name);
             imageView = itemView.findViewById(R.id.item_image);
             trash = itemView.findViewById(R.id.trash);
             share = itemView.findViewById(R.id.share);
             surfaceView = itemView.findViewById(R.id.surface_wrapper);
-            View popView = LayoutInflater.from(itemView.getContext()).inflate(R.layout.size_popup, null);
+            context = itemView.getContext();
 
         }
 
         public void setRecord(Record record) {
             this.record = record;
             SimpleDateFormat sdf = new SimpleDateFormat("MM-dd hh:mm:ss");
-            textName.setText(sdf.format(record.date));
+            textDate.setText(sdf.format(record.date));
             textSize.setText(String.format("%.2f * %.2f * %.2f = %.6f", record.x, record.y, record.z, record.x * record.y * record.z));
-            textId.setText(record.uid);
             imageView.setImageBitmap(record.bitmap);
-
+            if (record.name.equals("")) {
+                name = itemView.getContext().getResources().getString(R.string.untitled_name);
+            } else {
+                name = record.name;
+            }
+            textName.setText(name);
         }
+
     }
 
     public HistorySwipeAdapter(Activity activity) {
@@ -117,7 +124,7 @@ public class HistorySwipeAdapter extends RecyclerSwipeAdapter<HistorySwipeAdapte
             removeRecord(item);
         });
         viewHolder.share.setOnClickListener(v -> {
-            HistoryManager.getInstance().shareHistory(item);
+            RecordManager.getInstance().shareHistory(item);
         });
 
     }
@@ -134,7 +141,7 @@ public class HistorySwipeAdapter extends RecyclerSwipeAdapter<HistorySwipeAdapte
     }
 
     public void removeRecord(Record record) {
-        HistoryManager.getInstance().deleteRecordById(record.uid);
+        RecordManager.getInstance().deleteRecordById(record.uid);
         int pos = recordList.indexOf(record);
         recordList.remove(record);
         notifyItemRemoved(pos);

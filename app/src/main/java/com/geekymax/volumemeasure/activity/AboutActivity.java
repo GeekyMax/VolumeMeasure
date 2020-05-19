@@ -1,16 +1,15 @@
-package com.geekymax.volumemeasure;
+package com.geekymax.volumemeasure.activity;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.webkit.WebView;
 
+import com.geekymax.volumemeasure.R;
 import com.geekymax.volumemeasure.manager.FileManager;
-import com.geekymax.volumemeasure.manager.HistoryManager;
 
-public class AboutActivity extends AppCompatActivity {
+public class AboutActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

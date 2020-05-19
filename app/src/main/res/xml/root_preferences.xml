@@ -35,8 +35,8 @@
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
             android:defaultValue="@string/default_measurer_url"
-            app:key="measurer_webhook"
-            app:title="@string/measurer_webhook_title"
+            app:key="measurer_url"
+            app:title="@string/measurer_url_title"
             app:useSimpleSummaryProvider="true" />
 
 
@@ -49,15 +49,17 @@
             app:key="them_color"
             app:title="@string/theme_color_title"
             app:useSimpleSummaryProvider="true" />
-        <!--        <SwitchPreferenceCompat-->
-        <!--            app:key="theme_simple"-->
-        <!--            app:title="@string/them_simple_title" />-->
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            app:key="show_ar_label"
+            app:title="@string/show_ar_label_title" />
         <ListPreference
-            app:defaultValue="chinese"
+            app:defaultValue="zh"
             app:entries="@array/language_entries"
             app:entryValues="@array/language_values"
             app:key="language"
-            app:title="@string/language_title" />
+            app:title="@string/language_title"
+            app:useSimpleSummaryProvider="true" />
 
     </PreferenceCategory>
 
@@ -73,20 +75,20 @@
             app:title="@string/upload_title" />
 
         <EditTextPreference
-            app:key="webhook"
-            app:title="@string/webhook_title"
+            app:key="upload_url"
+            app:title="@string/upload_url_title"
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/more_header">
         <Preference app:title="@string/help_title">
             <intent
-                android:targetClass="com.geekymax.volumemeasure.HelpActivity"
+                android:targetClass="com.geekymax.volumemeasure.activity.HelpActivity"
                 android:targetPackage="com.geekymax.volumemeasure" />
         </Preference>
         <Preference app:title="@string/about_title">
             <intent
-                android:targetClass="com.geekymax.volumemeasure.AboutActivity"
+                android:targetClass="com.geekymax.volumemeasure.activity.AboutActivity"
                 android:targetPackage="com.geekymax.volumemeasure" />
         </Preference>
     </PreferenceCategory>

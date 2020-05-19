@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:animateLayoutChanges="true"
-    tools:context=".HistoryActivity">
+    tools:context=".activity.HistoryActivity">
 
     <com.daimajia.swipe.SwipeLayout
         android:id="@+id/swipe_layout"
@@ -121,10 +121,10 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
-                        android:id="@+id/item_id"
+                        android:id="@+id/item_date"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="这里是ID"
+                        android:text="这里是TIME"
                         android:textColor="@color/qmui_config_color_gray_6"
                         android:textSize="11sp"
                         app:layout_constraintBottom_toBottomOf="parent"

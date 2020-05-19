@@ -1,12 +1,9 @@
 package com.geekymax.volumemeasure.entity;
 
-import com.google.android.filament.Box;
-import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.Material;
 import com.google.ar.sceneform.rendering.ModelRenderable;
-import com.google.ar.sceneform.rendering.Renderable;
 import com.google.ar.sceneform.rendering.ShapeFactory;
 
 import java.util.ArrayList;

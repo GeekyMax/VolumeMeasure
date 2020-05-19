@@ -1,11 +1,11 @@
-package com.geekymax.volumemeasure;
+package com.geekymax.volumemeasure.activity;
 
 import android.os.Bundle;
 
+import com.geekymax.volumemeasure.R;
 import com.geekymax.volumemeasure.adapter.HistorySwipeAdapter;
-import com.geekymax.volumemeasure.manager.HistoryManager;
+import com.geekymax.volumemeasure.manager.RecordManager;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,7 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
 
-public class HistoryActivity extends AppCompatActivity {
+public class HistoryActivity extends BaseActivity {
     private ListView listView;
     private HistorySwipeAdapter listAdapter;
     private static final String TAG = "Geeky-History";
@@ -36,7 +36,7 @@ public class HistoryActivity extends AppCompatActivity {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         listView.setLayoutManager(layoutManager);
         listView.setAdapter(listAdapter);
-        HistoryManager.getInstance().getAllRecord(list -> {
+        RecordManager.getInstance().getAllRecord(list -> {
             runOnUiThread(() -> {
                 listAdapter.setRecordList(list);
                 listAdapter.notifyDataSetChanged();
@@ -51,7 +51,7 @@ public class HistoryActivity extends AppCompatActivity {
         if (item.getItemId() == android.R.id.home) {
             finish();
         } else if (item.getItemId() == R.id.clear) {
-            HistoryManager.getInstance().clearHistory();
+            RecordManager.getInstance().clearHistory();
             listAdapter.clearRecord();
         }
         return super.onOptionsItemSelected(item);

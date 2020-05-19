@@ -1,6 +1,7 @@
 package com.geekymax.volumemeasure.manager;
 
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.util.Log;
@@ -8,23 +9,23 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import com.geekymax.volumemeasure.HistoryActivity;
-import com.geekymax.volumemeasure.MyArFragment;
+import com.geekymax.volumemeasure.activity.HistoryActivity;
+import com.geekymax.volumemeasure.activity.MyArFragment;
 import com.geekymax.volumemeasure.R;
-import com.geekymax.volumemeasure.SettingsActivity;
+import com.geekymax.volumemeasure.activity.SettingsActivity;
 import com.geekymax.volumemeasure.entity.ArState;
 import com.geekymax.volumemeasure.entity.OnSceneUpdateListener;
 import com.geekymax.volumemeasure.measurer.MeasureBundle;
 import com.geekymax.volumemeasure.measurer.MeasureCallback;
-import com.geekymax.volumemeasure.util.IdGenerator;
 import com.geekymax.volumemeasure.util.TimeLogger;
 import com.google.ar.core.Plane;
 import com.google.ar.core.Session;
@@ -55,7 +56,7 @@ public class StateController implements OnSceneUpdateListener {
     Node rootNode;
 
     // 控件
-    private ImageView translucenceDown;
+    private View translucenceDown;
     private CircleButton collectButton;
     //    private CircleButton collectDoneButton;
 //    private CircleButton restartButton;
@@ -66,11 +67,12 @@ public class StateController implements OnSceneUpdateListener {
     private ImageButton historyButton;
     private ConstraintLayout slideView;
     private MaryPopup sizePopup;
+    private TextView userIdText;
     // manager
     private BoxManager boxManager;
     private MaterialManager materialManager;
     private MeasureManager measureManager;
-    private HistoryManager historyManager;
+    private RecordManager historyManager;
     private FileManager fileManager;
     private SettingManager settingManager;
     private MeasureBundle measureBundle;
@@ -79,119 +81,9 @@ public class StateController implements OnSceneUpdateListener {
 
     private int startScreenshot = -1;
 
-    private void onClickCollectButton() {
-        if (arState == ArState.READY) {
-            setArState(ArState.COLLECTING);
-            anchorNode = measureManager.initMeasuring(arSession, sceneView.getHeight(), sceneView.getWidth(), new MeasureCallback() {
-                @Override
-                public void onFail(String msg) {
-                    TimeLogger.getLogger().log("fail 1");
-                    Toast.makeText(activity, "测量失败:" + msg, Toast.LENGTH_SHORT).show();
-                    restart();
-                }
+    // 使用URL scheme附带的参数
+    private String givenName;
 
-                @Override
-                public void onSuccess(String msg, double[] result, float angle) {
-                    TimeLogger.getLogger().log("1");
-                    setArState(ArState.DONE);
-                    Log.d(TAG, "OnSuccess");
-                    measureBundle = new MeasureBundle(result, angle);
-                    showText(measureBundle.toString());
-                    measureBundle.setAction(bundle -> {
-                        showText(bundle.toString());
-                    });
-                    if (anchorNode != null) {
-                        TimeLogger.getLogger().log("2");
-
-                        anchorNode.setParent(sceneView.getScene());
-                        rootNode = new Node();
-                        rootNode.setParent(anchorNode);
-                        rootNode.setLocalPosition(measureBundle.getCenter());
-                        rootNode.setLocalRotation(Quaternion.axisAngle(new Vector3(0, 1, 0), angle));
-                        TimeLogger.getLogger().log("3");
-
-                        boxManager.drawBox(rootNode, measureBundle);
-                        TimeLogger.getLogger().log("4");
-                        if (SettingManager.getInstance().autoSaveHistory(activity)) {
-                            TimeLogger.getLogger().log("5");
-                            startScreenshot = 10;
-                        }
-                    }
-                }
-            });
-            collectButton.setImageResource(R.drawable.done);
-        } else if (arState == ArState.COLLECTING) {
-
-            setArState(ArState.COLLECTING_DONE);
-            TimeLogger.getLogger().log("startMeasuring");
-
-            measureManager.startMeasuring(arSession);
-            collectButton.setImageResource(R.drawable.refresh_line);
-        } else if (arState == ArState.DONE) {
-            collectButton.setImageResource(R.drawable.add_line);
-            restart();
-        }
-    }
-
-
-    // 重新开始一次新的测量
-    public void restart() {
-        this.arState = ArState.READY;
-        BoxManager.getInstance().clear();
-        showText("ready");
-        MeasureManager.getInstance(activity).clear();
-    }
-
-    // 每帧更新时调用
-    @Override
-    public void onUpdate(ArSceneView arSceneView) {
-        if (arSceneView == null) {
-            return;
-        }
-        if (arState == ArState.INITIAL && hasTrackingPlane(arSceneView.getSession())) {
-            setArState(ArState.READY);
-            changeWidgetState(true);
-        }
-        if (measureManager != null) {
-            measureManager.onUpdate(arSceneView);
-        }
-        // 数帧之后,自动截图
-        if (startScreenshot > 0) {
-            startScreenshot--;
-        } else if (startScreenshot == 0) {
-            startScreenshot--;
-            saveSnapshot();
-        }
-    }
-
-    // 判断是否已有定位到的平面
-    private boolean hasTrackingPlane(Session session) {
-        if (session == null) {
-            return false;
-        }
-        for (Plane plane : session.getAllTrackables(Plane.class)) {
-            if (plane.getTrackingState() == TrackingState.TRACKING) {
-//                mainPlane = plane;
-                return true;
-            }
-        }
-        return false;
-    }
-
-    // 改变控件的可用状态
-    private void changeWidgetState(boolean available) {
-        if (available) {
-            collectButton.setVisibility(View.VISIBLE);
-            translucenceDown.setVisibility(View.VISIBLE);
-            screenshotButton.setVisibility(View.VISIBLE);
-            refreshButton.setVisibility(View.VISIBLE);
-        } else {
-            collectButton.setVisibility(View.INVISIBLE);
-            translucenceDown.setVisibility(View.INVISIBLE);
-            screenshotButton.setVisibility(View.INVISIBLE);
-            refreshButton.setVisibility(View.INVISIBLE);
-        }
-    }
 
     // 初始化控件等元素
     @SuppressLint("ClickableViewAccessibility")
@@ -200,7 +92,7 @@ public class StateController implements OnSceneUpdateListener {
         materialManager = MaterialManager.getInstance(activity);
         boxManager = BoxManager.getInstance(activity, this);
         measureManager = MeasureManager.getInstance(activity);
-        historyManager = HistoryManager.getInstance(activity);
+        historyManager = RecordManager.getInstance(activity);
         fileManager = FileManager.getInstance().init(activity);
         settingManager = SettingManager.getInstance();
         settingManager.setContext(activity);
@@ -218,11 +110,17 @@ public class StateController implements OnSceneUpdateListener {
         settingButton = activity.findViewById(R.id.setting_btn);
         historyButton = activity.findViewById(R.id.history_btn);
         slideView = activity.findViewById(R.id.slide_view);
-        collectButton.setVisibility(View.INVISIBLE);
+        userIdText = activity.findViewById(R.id.user_id_text);
+        if (givenName == null || givenName.equals("")) {
+            userIdText.setText(R.string.untitled_name);
+        } else {
+            userIdText.setText(givenName);
+        }
+//        collectButton.setVisibility(View.INVISIBLE);
 //        collectDoneButton.setVisibility(View.INVISIBLE);
         translucenceDown.setVisibility(View.INVISIBLE);
-        screenshotButton.setVisibility(View.INVISIBLE);
-        refreshButton.setVisibility(View.INVISIBLE);
+//        screenshotButton.setVisibility(View.INVISIBLE);
+//        refreshButton.setVisibility(View.INVISIBLE);
         slideView.setVisibility(View.INVISIBLE);
 //        collectDoneButton.setOnClickListener(v -> this.onClickCollectDoneButton());
         collectButton.setOnClickListener(v -> this.onClickCollectButton());
@@ -289,6 +187,143 @@ public class StateController implements OnSceneUpdateListener {
 
         });
 
+        userIdText.setOnClickListener(v -> {
+            Toast.makeText(activity.getApplicationContext(), "测试！", Toast.LENGTH_SHORT).show();
+
+            final EditText et = new EditText(activity);
+            et.setText(givenName);
+            new AlertDialog.Builder(activity).setTitle("自定义ID")
+                    .setView(et)
+                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            givenName = et.getText().toString();
+                            if (givenName.equals("")) {
+                                userIdText.setText(R.string.untitled_name);
+                            } else {
+                                userIdText.setText(givenName);
+                            }
+                        }
+                    })
+                    .setNegativeButton("取消", null).show();
+
+        });
+
+    }
+
+
+    private void onClickCollectButton() {
+        if (arState == ArState.READY) {
+            setArState(ArState.COLLECTING);
+            anchorNode = measureManager.initMeasuring(arSession, sceneView.getHeight(), sceneView.getWidth(), new MeasureCallback() {
+                @Override
+                public void onFail(String msg) {
+                    TimeLogger.getLogger().log("fail 1");
+                    Toast.makeText(activity, "测量失败:" + msg, Toast.LENGTH_SHORT).show();
+                    restart();
+                }
+
+                @Override
+                public void onSuccess(String msg, double[] result, float angle) {
+                    TimeLogger.getLogger().log("1");
+                    setArState(ArState.DONE);
+                    Log.d(TAG, "OnSuccess");
+                    measureBundle = new MeasureBundle(result, angle);
+                    showText(measureBundle.toString());
+                    measureBundle.setAction(bundle -> {
+                        showText(bundle.toString());
+                    });
+                    if (anchorNode != null) {
+                        TimeLogger.getLogger().log("2");
+
+                        anchorNode.setParent(sceneView.getScene());
+                        rootNode = new Node();
+                        rootNode.setParent(anchorNode);
+                        rootNode.setLocalPosition(measureBundle.getCenter());
+                        rootNode.setLocalRotation(Quaternion.axisAngle(new Vector3(0, 1, 0), angle));
+                        TimeLogger.getLogger().log("3");
+
+                        boxManager.drawBox(rootNode, measureBundle);
+                        TimeLogger.getLogger().log("4");
+                        if (SettingManager.getInstance().autoSaveHistory(activity)) {
+                            TimeLogger.getLogger().log("5");
+                            startScreenshot = 10;
+                        }
+                    }
+                }
+            });
+            collectButton.setImageResource(R.drawable.done);
+        } else if (arState == ArState.COLLECTING) {
+
+            setArState(ArState.COLLECTING_DONE);
+            TimeLogger.getLogger().log("startMeasuring");
+
+            measureManager.startMeasuring(arSession);
+            collectButton.setImageResource(R.drawable.refresh_line);
+        } else if (arState == ArState.DONE) {
+            collectButton.setImageResource(R.drawable.add_line);
+            restart();
+        }
+    }
+
+
+    // 重新开始一次新的测量
+    public void restart() {
+        this.givenName = null;
+        this.arState = ArState.READY;
+        BoxManager.getInstance().clear();
+        showText("ready");
+        MeasureManager.getInstance(activity).clear();
+    }
+
+    // 每帧更新时调用
+    @Override
+    public void onUpdate(ArSceneView arSceneView) {
+        if (arSceneView == null) {
+            return;
+        }
+        if (arState == ArState.INITIAL && hasTrackingPlane(arSceneView.getSession())) {
+            setArState(ArState.READY);
+            changeWidgetState(true);
+        }
+        if (measureManager != null) {
+            measureManager.onUpdate(arSceneView);
+        }
+        // 数帧之后,自动截图
+        if (startScreenshot > 0) {
+            startScreenshot--;
+        } else if (startScreenshot == 0) {
+            startScreenshot--;
+            saveSnapshot();
+        }
+    }
+
+    // 判断是否已有定位到的平面
+    private boolean hasTrackingPlane(Session session) {
+        if (session == null) {
+            return false;
+        }
+        for (Plane plane : session.getAllTrackables(Plane.class)) {
+            if (plane.getTrackingState() == TrackingState.TRACKING) {
+//                mainPlane = plane;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // 改变控件的可用状态
+    private void changeWidgetState(boolean available) {
+        if (available) {
+//            collectButton.setVisibility(View.VISIBLE);
+            translucenceDown.setVisibility(View.VISIBLE);
+//            screenshotButton.setVisibility(View.VISIBLE);
+//            refreshButton.setVisibility(View.VISIBLE);
+        } else {
+//            collectButton.setVisibility(View.INVISIBLE);
+            translucenceDown.setVisibility(View.INVISIBLE);
+//            screenshotButton.setVisibility(View.INVISIBLE);
+//            refreshButton.setVisibility(View.INVISIBLE);
+        }
     }
 
     private View setPopView(View popView) {
@@ -358,14 +393,18 @@ public class StateController implements OnSceneUpdateListener {
     }
 
     private void saveSnapshot() {
-        String id = IdGenerator.genUuid();
         Vector3 size = BoxManager.getInstance().getMeasureBundle().getLength();
         Log.d(TAG, "onPixelCopyFinished: start");
-        historyManager.saveMeasureRecord(id, arFragment.getArSceneView(), size);
+        historyManager.saveMeasureRecord(givenName, arFragment.getArSceneView(), size);
         Toast.makeText(activity, "记录保存成功!", Toast.LENGTH_SHORT).show();
     }
 
     public boolean onBackPressed() {
         return !sizePopup.close(true);
+    }
+
+    public void setGiven(String name) {
+        this.givenName = name;
+
     }
 }

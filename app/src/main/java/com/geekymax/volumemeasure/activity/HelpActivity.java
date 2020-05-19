@@ -1,4 +1,4 @@
-package com.geekymax.volumemeasure;
+package com.geekymax.volumemeasure.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -7,9 +7,10 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.webkit.WebView;
 
+import com.geekymax.volumemeasure.R;
 import com.geekymax.volumemeasure.manager.FileManager;
 
-public class HelpActivity extends AppCompatActivity {
+public class HelpActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.geekymax.volumemeasure;
+package com.geekymax.volumemeasure.activity;
 
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
@@ -29,6 +30,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import com.geekymax.volumemeasure.R;
 import com.geekymax.volumemeasure.manager.StateController;
 
 import org.nd4j.linalg.factory.Nd4j;
@@ -37,11 +39,12 @@ import org.nd4j.linalg.factory.Nd4j;
 /**
  * This is an example activity that uses the Sceneform UX package_1 to make common AR tasks easier.
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
     private static final String TAG = "Geeky-Activity";
     private static final double MIN_OPENGL_VERSION = 3.0;
     //  当前全局状态
     private StateController stateController;
+
     @Override
     @SuppressWarnings({"AndroidApiChecker", "FutureReturnValueIgnored"})
     // CompletableFuture requires api level 24
@@ -53,12 +56,25 @@ public class MainActivity extends AppCompatActivity {
         }
         setContentView(R.layout.activity_main);
         stateController = new StateController();
+        // 支持 URL scheme
+        Uri uri = getIntent().getData();
+        if (uri != null) {
+            // 完整的url信息
+            String url = uri.toString();
+            Log.d(TAG, "onCreate: scheme" + uri);
+            String name = uri.getQueryParameter("name");
+            Toast.makeText(this, "userName = " + name, Toast.LENGTH_SHORT).show();
+            if (!"".equals(name)) {
+                stateController.setGiven(name);
+            }
+        }
         stateController.initWidget(this);
         verifyStoragePermissions(this);
         // 起一个线程初次调用ND4j以用于加载ND4j库,否则初次运行会耗时
 //        AsyncTask.execute(Nd4j::empty);
         new Thread(Nd4j::empty).run();
     }
+
 
     @Override
     protected void onPostResume() {

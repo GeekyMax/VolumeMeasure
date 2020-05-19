@@ -8,6 +8,7 @@ import androidx.preference.PreferenceManager;
 import com.geekymax.volumemeasure.R;
 import com.geekymax.volumemeasure.constant.SettingConstant;
 
+import java.util.Locale;
 import java.util.function.Consumer;
 
 /**
@@ -66,16 +67,27 @@ public class SettingManager {
     }
 
     public String getWebhookUrl(Context context) {
-        return getSettingValue(context, "webhook", "");
+        return getSettingValue(context, "upload_url", "");
 
     }
 
     // 获取online measurer url, 如果为空就使用默认
     public String getMeasurerWebhookUrl() {
-        String url = getSettingValue(context, "measurer_webhook", "");
+        String url = getSettingValue(context, "measurer_url", "");
         if (url.equals("")) {
             url = context.getResources().getString(R.string.default_measurer_url);
         }
         return url;
+    }
+
+    public Locale getLocale(Context context) {
+        String language = getSettingValue(context, "language", "zh");
+        if ("zh-rTW".equals(language)) {
+            return new Locale("zh-rTW");
+        } else if ("en".equals(language)) {
+            return new Locale("en");
+        } else {
+            return new Locale("zh");
+        }
     }
 }

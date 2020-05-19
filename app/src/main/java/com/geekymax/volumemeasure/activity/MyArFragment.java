@@ -1,4 +1,4 @@
-package com.geekymax.volumemeasure;
+package com.geekymax.volumemeasure.activity;
 
 import android.util.Log;
 import android.widget.Toast;

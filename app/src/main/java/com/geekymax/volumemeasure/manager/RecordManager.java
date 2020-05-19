@@ -13,12 +13,11 @@ import android.widget.Toast;
 import androidx.room.Room;
 
 import com.geekymax.volumemeasure.entity.Record;
+import com.geekymax.volumemeasure.util.IdGenerator;
 import com.google.ar.sceneform.math.Vector3;
 
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONException;
 import org.json.JSONObject;
-import org.math.plot.utils.Array;
 
 import java.io.IOException;
 import java.util.Date;
@@ -33,34 +32,35 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class HistoryManager {
-    private static final String TAG = "Geeky-HistoryManager";
-    private static HistoryManager historyManager;
+public class RecordManager {
+    private static final String TAG = "Geeky-RecordManager";
+    private static RecordManager instance;
     private AppDatabase db;
     private Context context;
     private OkHttpClient client;
 
-    private HistoryManager(Context context) {
+    private RecordManager(Context context) {
         this.context = context;
         db = Room.databaseBuilder(context.getApplicationContext(),
                 AppDatabase.class, "measure2.db").build();
         client = new OkHttpClient();
     }
 
-    public static HistoryManager getInstance(Context context) {
-        if (historyManager == null) {
-            historyManager = new HistoryManager(context);
+    public static RecordManager getInstance(Context context) {
+        if (instance == null) {
+            instance = new RecordManager(context);
         }
-        return historyManager;
+        return instance;
     }
 
-    public static HistoryManager getInstance() {
+    public static RecordManager getInstance() {
         return getInstance(null);
     }
 
-    public void saveMeasureRecord(String id, SurfaceView surfaceView, Vector3 size) {
+    public void saveMeasureRecord(String name, SurfaceView surfaceView, Vector3 size) {
+        String id = IdGenerator.genUuid();
         Date now = new Date();
-        Record record = new Record(id, now, "未命名", size);
+        Record record = new Record(id, now, name != null ? name : "", size);
         Log.d(TAG, "saveMeasureRecord: id: " + record.uid);
         AsyncTask.execute(() -> {
             db.recordDao().insert(record);

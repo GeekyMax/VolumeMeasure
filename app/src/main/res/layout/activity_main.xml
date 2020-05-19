@@ -5,11 +5,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
-    tools:context=".MainActivity">
+    tools:context=".activity.MainActivity">
 
     <fragment
         android:id="@+id/ar_fragment"
-        android:name="com.geekymax.volumemeasure.MyArFragment"
+        android:name="com.geekymax.volumemeasure.activity.MyArFragment"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -18,6 +18,7 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0" />
+
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -80,7 +81,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-    <ImageView
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/down"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -91,56 +92,68 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintVertical_bias="1.0">
 
-    <at.markushi.ui.CircleButton
-        android:id="@+id/collect_btn"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:background="@color/transparent"
-        android:clickable="true"
-        android:padding="12dp"
-        android:src="@drawable/add_line_white"
-        android:tint="@color/dark"
-        app:cb_color="@color/qmui_config_color_white"
-        app:layout_constraintBottom_toBottomOf="@id/down"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/down"
-        tools:src="@drawable/add_line" />
+        <at.markushi.ui.CircleButton
+            android:id="@+id/collect_btn"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:background="@color/transparent"
+            android:clickable="true"
+            android:padding="12dp"
+            android:src="@drawable/add_line_white"
+            android:tint="@color/dark"
+            app:cb_color="@color/qmui_config_color_white"
+            app:layout_constraintBottom_toBottomOf="@id/down"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/down"
+            tools:src="@drawable/add_line" />
 
 
-    <ImageButton
-        android:id="@+id/test_btn"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginEnd="32dp"
-        android:background="@color/transparent"
-        android:clickable="true"
-        android:focusable="true"
-        android:scaleType="fitCenter"
-        android:src="@drawable/screenshot"
-        android:tint="@color/white"
-        app:layout_constraintBottom_toBottomOf="@+id/collect_btn"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/collect_btn" />
+        <ImageButton
+            android:id="@+id/test_btn"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="32dp"
+            android:background="@color/transparent"
+            android:clickable="true"
+            android:focusable="true"
+            android:scaleType="fitCenter"
+            android:src="@drawable/screenshot"
+            android:tint="@color/white"
+            app:layout_constraintBottom_toBottomOf="@+id/collect_btn"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/collect_btn" />
 
-    <ImageButton
-        android:id="@+id/refresh_btn"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="32dp"
-        android:background="@color/transparent"
-        android:clickable="true"
-        android:focusable="true"
-        android:scaleType="fitCenter"
-        android:theme="@style/RippleWhite"
-        android:tint="@color/white"
-        app:layout_constraintBottom_toBottomOf="@+id/collect_btn"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/collect_btn"
-        app:srcCompat="@drawable/sync" />
+        <ImageButton
+            android:id="@+id/refresh_btn"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="32dp"
+            android:background="@color/transparent"
+            android:clickable="true"
+            android:focusable="true"
+            android:scaleType="fitCenter"
+            android:theme="@style/RippleWhite"
+            android:tint="@color/white"
+            app:layout_constraintBottom_toBottomOf="@+id/collect_btn"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/collect_btn"
+            app:srcCompat="@drawable/sync" />
 
+        <TextView
+            android:id="@+id/user_id_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="未命名"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toTopOf="@+id/collect_btn"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/slide_view"
