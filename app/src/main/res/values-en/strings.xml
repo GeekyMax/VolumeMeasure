@@ -1,40 +1,40 @@
 <resources>
     <!--活动名-->
     <string name="app_name">AR体积测量</string>
-    <string name="title_activity_settings">设置</string>
-    <string name="title_activity_history">记录</string>
+    <string name="title_activity_settings">Setting</string>
+    <string name="title_activity_history">Record</string>
 
     <!-- Preference Titles -->
-    <string name="general_header">通用</string>
-    <string name="theme_header">外观</string>
-    <string name="history_header">记录</string>
-    <string name="more_header">更多</string>
+    <string name="general_header">General</string>
+    <string name="theme_header">Appearance</string>
+    <string name="history_header">Record</string>
+    <string name="more_header">More</string>
     <!--通用-->
-    <string name="measurer_title">测量方式</string>
-    <string name="measure_unit_title">数据单位</string>
-    <string name="measurer_url_title">在线测量器地址</string>
+    <string name="measurer_title">Measurer</string>
+    <string name="measure_unit_title">Unit</string>
+    <string name="measurer_url_title">Measurer url</string>
     <!--外观-->
-    <string name="theme_color_title">主题颜色</string>
-    <string name="language_title">语言</string>
-    <string name="show_ar_label_title">AR显示尺寸数据</string>
+    <string name="theme_color_title">theme color</string>
+    <string name="language_title">language</string>
+    <string name="show_ar_label_title">AR label</string>
     <!--记录-->
-    <string name="memory_title">自动记录测量</string>
-    <string name="upload_title">上传测量记录</string>
-    <string name="upload_url_title">记录上传地址</string>
+    <string name="memory_title">auto save records</string>
+    <string name="upload_title">upload records</string>
+    <string name="upload_url_title">upload webhook url</string>
     <!--更多-->
-    <string name="help_title">帮助</string>
-    <string name="about_title">关于</string>
+    <string name="help_title">help</string>
+    <string name="about_title">about</string>
 
     <!--    默认数值-->
     <string name="default_measurer_url">https://www.geekymax.com/measurer</string>
 
     <!--  无记录 默认名  -->
-    <string name="untitled_name">未命名</string>
+    <string name="untitled_name">default</string>
 
     <!--状态-->
-    <string name="state_prepare">初始化</string>
-    <string name="state_ready">就绪</string>
-    <string name="state_collecting">采集中</string>
-    <string name="state_measuring">测量中</string>
-    <string name="state_done">测量完成</string>
+    <string name="state_prepare">initial</string>
+    <string name="state_ready">ready</string>
+    <string name="state_collecting">collecting</string>
+    <string name="state_measuring">measuring</string>
+    <string name="state_done">done</string>
 </resources>
