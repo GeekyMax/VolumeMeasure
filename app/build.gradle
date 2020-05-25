@@ -45,7 +45,7 @@ android {
     }
 
 }
-
+def dl4j_version = "1.0.0-beta6"
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
@@ -65,16 +65,20 @@ dependencies {
 //    implementation group: 'colt', name: 'colt', version: '1.2.0'
     implementation group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
     // dl4j与nd4j所需依赖库
-    implementation(group: 'org.nd4j', name: 'nd4j-api', version: '1.0.0-beta6') {
+    implementation(group: 'org.nd4j', name: 'nd4j-api', version: "$dl4j_version") {
         exclude group: 'com.google.flatbuffers', module: 'flatbuffers-java'
     }
-    implementation(group: 'org.deeplearning4j', name: 'deeplearning4j-core', version: '1.0.0-beta6') {
+    implementation(group: 'org.deeplearning4j', name: 'deeplearning4j-core', version: "$dl4j_version") {
         exclude group: 'org.lucee', module: 'oswego-concurrent'
         exclude group: 'com.google.flatbuffers', module: 'flatbuffers-java'
     }
-    implementation group: 'org.nd4j', name: 'nd4j-native', version: '1.0.0-beta6'
-    implementation group: 'org.datavec', name: 'datavec-api', version: '1.0.0-beta6'
-    implementation group: 'org.nd4j', name: 'nd4j-native-platform', version: '1.0.0-beta6'
+    implementation group: 'org.nd4j', name: 'nd4j-native', version: "$dl4j_version"
+    compile "org.nd4j:nd4j-native:$dl4j_version:android-x86"
+    implementation "org.nd4j:nd4j-native:$dl4j_version:android-arm"
+    implementation group: 'org.datavec', name: 'datavec-api', version: "$dl4j_version"
+    implementation group: 'org.nd4j', name: 'nd4j-native-platform', version: "$dl4j_version"
+    implementation group: 'org.nd4j', name: 'nd4j-native', version: "$dl4j_version", classifier: "android-arm64"
+
     // 绘图库
     implementation group: 'com.github.yannrichet', name: 'JMathPlot', version: '1.0.1'
     // http库

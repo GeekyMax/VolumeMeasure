@@ -18,7 +18,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import com.geekymax.volumemeasure.activity.HistoryActivity;
+import com.geekymax.volumemeasure.activity.RecordActivity;
 import com.geekymax.volumemeasure.activity.MyArFragment;
 import com.geekymax.volumemeasure.R;
 import com.geekymax.volumemeasure.activity.SettingsActivity;
@@ -26,7 +26,10 @@ import com.geekymax.volumemeasure.entity.ArState;
 import com.geekymax.volumemeasure.entity.OnSceneUpdateListener;
 import com.geekymax.volumemeasure.measurer.MeasureBundle;
 import com.geekymax.volumemeasure.measurer.MeasureCallback;
+import com.geekymax.volumemeasure.util.LogUtil;
 import com.geekymax.volumemeasure.util.TimeLogger;
+import com.google.ar.core.Frame;
+import com.google.ar.core.HitResult;
 import com.google.ar.core.Plane;
 import com.google.ar.core.Session;
 import com.google.ar.core.TrackingState;
@@ -35,9 +38,16 @@ import com.google.ar.sceneform.ArSceneView;
 import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.math.Vector3;
+import com.google.ar.sceneform.rendering.MaterialFactory;
+import com.google.ar.sceneform.rendering.Renderable;
+import com.google.ar.sceneform.rendering.ShapeFactory;
 import com.meetic.marypopup.MaryPopup;
 
+import java.util.List;
+
 import at.markushi.ui.CircleButton;
+
+import static android.graphics.Color.RED;
 
 public class StateController implements OnSceneUpdateListener {
     private float startY; //手指刚开始滑动时记录点 Y轴
@@ -52,7 +62,7 @@ public class StateController implements OnSceneUpdateListener {
 
     // sceneform中模型的 anchor 和root node
 //    Plane mainPlane;
-    AnchorNode anchorNode;
+//    AnchorNode anchorNode;
     Node rootNode;
 
     // 控件
@@ -61,7 +71,7 @@ public class StateController implements OnSceneUpdateListener {
     //    private CircleButton collectDoneButton;
 //    private CircleButton restartButton;
     private ImageButton screenshotButton;
-    private ImageButton refreshButton;
+    private ImageButton referenceButton;
     private TextView infoText;
     private ImageButton settingButton;
     private ImageButton historyButton;
@@ -105,7 +115,7 @@ public class StateController implements OnSceneUpdateListener {
         collectButton = activity.findViewById(R.id.collect_btn);
 //        collectDoneButton = activity.findViewById(R.id.collect_done_btn);
         screenshotButton = activity.findViewById(R.id.test_btn);
-        refreshButton = activity.findViewById(R.id.refresh_btn);
+        referenceButton = activity.findViewById(R.id.reference_btn);
         infoText = activity.findViewById(R.id.info_text);
         settingButton = activity.findViewById(R.id.setting_btn);
         historyButton = activity.findViewById(R.id.history_btn);
@@ -120,7 +130,7 @@ public class StateController implements OnSceneUpdateListener {
 //        collectDoneButton.setVisibility(View.INVISIBLE);
         translucenceDown.setVisibility(View.INVISIBLE);
 //        screenshotButton.setVisibility(View.INVISIBLE);
-//        refreshButton.setVisibility(View.INVISIBLE);
+//        referenceButton.setVisibility(View.INVISIBLE);
         slideView.setVisibility(View.INVISIBLE);
 //        collectDoneButton.setOnClickListener(v -> this.onClickCollectDoneButton());
         collectButton.setOnClickListener(v -> this.onClickCollectButton());
@@ -130,15 +140,41 @@ public class StateController implements OnSceneUpdateListener {
             }
             saveSnapshot();
         });
-        refreshButton.setOnClickListener(v -> {
-            restart();
+        referenceButton.setOnClickListener(v -> {
+            Log.d(TAG, "initWidget: click reference");
+            try {
+                Session session = arFragment.getArSceneView().getSession();
+                if (!hasTrackingPlane(session)) {
+                    return;
+                }
+                Frame frame = session.update();
+                List<HitResult> hitResults = frame.hitTest(sceneView.getHeight() / 2, sceneView.getWidth() / 2);
+                for (HitResult hitResult : hitResults) {
+                    AnchorNode anchorNode = new AnchorNode(hitResult.createAnchor());
+                    anchorNode.setParent(arFragment.getArSceneView().getScene());
+                    Vector3 pos = anchorNode.getWorldPosition();
+                    Quaternion rot = anchorNode.getWorldRotation();
+                    LogUtil.log("pos", pos, "rot", rot);
+                    anchorNode.setLocalPosition(Vector3.zero());
+                    anchorNode.setLocalRotation(new Quaternion());
+                    pos = anchorNode.getWorldPosition();
+                    rot = anchorNode.getWorldRotation();
+                    LogUtil.log("pos", pos, "rot", rot);
+                    showReferenceLine(anchorNode);
+                    break;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+
+            }
+
         });
         settingButton.setOnClickListener(v -> {
             Intent intent = new Intent(activity, SettingsActivity.class);
             activity.startActivity(intent);
         });
         historyButton.setOnClickListener(v -> {
-            Intent intent = new Intent(activity, HistoryActivity.class);
+            Intent intent = new Intent(activity, RecordActivity.class);
             activity.startActivity(intent);
         });
         arFragment.getArSceneView().setDrawingCacheEnabled(true);
@@ -214,30 +250,40 @@ public class StateController implements OnSceneUpdateListener {
     private void onClickCollectButton() {
         if (arState == ArState.READY) {
             setArState(ArState.COLLECTING);
-            anchorNode = measureManager.initMeasuring(arSession, sceneView.getHeight(), sceneView.getWidth(), new MeasureCallback() {
+            measureManager.initMeasuring(arSession, sceneView.getHeight(), sceneView.getWidth(), new MeasureCallback() {
                 @Override
                 public void onFail(String msg) {
-                    TimeLogger.getLogger().log("fail 1");
-                    Toast.makeText(activity, "测量失败:" + msg, Toast.LENGTH_SHORT).show();
-                    restart();
+                    activity.runOnUiThread(() -> {
+                        TimeLogger.getLogger().log("fail 1");
+                        Toast.makeText(activity, "测量失败:" + msg, Toast.LENGTH_SHORT).show();
+                        restart();
+                    });
+
                 }
 
                 @Override
                 public void onSuccess(String msg, double[] result, float angle) {
-                    TimeLogger.getLogger().log("1");
-                    setArState(ArState.DONE);
-                    Log.d(TAG, "OnSuccess");
-                    measureBundle = new MeasureBundle(result, angle);
-                    showText(measureBundle.toString());
-                    measureBundle.setAction(bundle -> {
-                        showText(bundle.toString());
-                    });
-                    if (anchorNode != null) {
+                    activity.runOnUiThread(() -> {
+                        collectButton.setEnabled(true);
+                        collectButton.setImageResource(R.drawable.refresh_line);
+                        TimeLogger.getLogger().log("1");
+                        setArState(ArState.DONE);
+                        Log.d(TAG, "OnSuccess");
+                        measureBundle = new MeasureBundle(result, angle);
+                        showText(measureBundle.toString());
+                        measureBundle.setAction(bundle -> {
+                            showText(bundle.toString());
+                        });
                         TimeLogger.getLogger().log("2");
 
-                        anchorNode.setParent(sceneView.getScene());
+                        Node testNode = new Node();
+                        testNode.setParent(arFragment.getArSceneView().getScene());
+                        LogUtil.log("tesNode world", testNode.getWorldPosition());
+                        LogUtil.log("tesNode local", testNode.getLocalPosition());
+                        testNode.setLocalPosition(Vector3.zero());
+
                         rootNode = new Node();
-                        rootNode.setParent(anchorNode);
+                        rootNode.setParent(arFragment.getArSceneView().getScene());
                         rootNode.setLocalPosition(measureBundle.getCenter());
                         rootNode.setLocalRotation(Quaternion.axisAngle(new Vector3(0, 1, 0), angle));
                         TimeLogger.getLogger().log("3");
@@ -248,7 +294,9 @@ public class StateController implements OnSceneUpdateListener {
                             TimeLogger.getLogger().log("5");
                             startScreenshot = 10;
                         }
-                    }
+
+                    });
+
                 }
             });
             collectButton.setImageResource(R.drawable.done);
@@ -258,7 +306,7 @@ public class StateController implements OnSceneUpdateListener {
             TimeLogger.getLogger().log("startMeasuring");
 
             measureManager.startMeasuring(arSession);
-            collectButton.setImageResource(R.drawable.refresh_line);
+            collectButton.setEnabled(false);
         } else if (arState == ArState.DONE) {
             collectButton.setImageResource(R.drawable.add_line);
             restart();
@@ -284,6 +332,7 @@ public class StateController implements OnSceneUpdateListener {
         if (arState == ArState.INITIAL && hasTrackingPlane(arSceneView.getSession())) {
             setArState(ArState.READY);
             changeWidgetState(true);
+
         }
         if (measureManager != null) {
             measureManager.onUpdate(arSceneView);
@@ -298,7 +347,7 @@ public class StateController implements OnSceneUpdateListener {
     }
 
     // 判断是否已有定位到的平面
-    private boolean hasTrackingPlane(Session session) {
+    public boolean hasTrackingPlane(Session session) {
         if (session == null) {
             return false;
         }
@@ -317,12 +366,12 @@ public class StateController implements OnSceneUpdateListener {
 //            collectButton.setVisibility(View.VISIBLE);
             translucenceDown.setVisibility(View.VISIBLE);
 //            screenshotButton.setVisibility(View.VISIBLE);
-//            refreshButton.setVisibility(View.VISIBLE);
+//            referenceButton.setVisibility(View.VISIBLE);
         } else {
 //            collectButton.setVisibility(View.INVISIBLE);
             translucenceDown.setVisibility(View.INVISIBLE);
 //            screenshotButton.setVisibility(View.INVISIBLE);
-//            refreshButton.setVisibility(View.INVISIBLE);
+//            referenceButton.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -395,6 +444,7 @@ public class StateController implements OnSceneUpdateListener {
     private void saveSnapshot() {
         Vector3 size = BoxManager.getInstance().getMeasureBundle().getLength();
         Log.d(TAG, "onPixelCopyFinished: start");
+
         historyManager.saveMeasureRecord(givenName, arFragment.getArSceneView(), size);
         Toast.makeText(activity, "记录保存成功!", Toast.LENGTH_SHORT).show();
     }
@@ -406,5 +456,24 @@ public class StateController implements OnSceneUpdateListener {
     public void setGiven(String name) {
         this.givenName = name;
 
+    }
+
+    public void showReferenceLine(AnchorNode anchorNode) {
+
+        Node node = new Node();
+        if (anchorNode != null) {
+            node.setParent(anchorNode);
+        } else {
+            node.setParent(arFragment.getArSceneView().getScene());
+        }
+        node.setLocalPosition(Vector3.zero());
+        node.setWorldRotation(new Quaternion());
+        MaterialFactory.makeTransparentWithColor(activity, new com.google.ar.sceneform.rendering.Color(RED))
+                .thenAccept(
+                        material -> {
+                            Renderable redSphereRenderable =
+                                    ShapeFactory.makeCube(new Vector3(1f, 0.01f, 0.01f), Vector3.zero(), material);
+                            node.setRenderable(redSphereRenderable);
+                        });
     }
 }

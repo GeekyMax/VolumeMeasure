@@ -1,5 +1,6 @@
 package com.geekymax.volumemeasure.manager;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -37,16 +38,18 @@ public class RecordManager {
     private static RecordManager instance;
     private AppDatabase db;
     private Context context;
+    private Activity activity;
     private OkHttpClient client;
 
-    private RecordManager(Context context) {
+    private RecordManager(Activity context) {
         this.context = context;
+        this.activity = context;
         db = Room.databaseBuilder(context.getApplicationContext(),
                 AppDatabase.class, "measure2.db").build();
         client = new OkHttpClient();
     }
 
-    public static RecordManager getInstance(Context context) {
+    public static RecordManager getInstance(Activity context) {
         if (instance == null) {
             instance = new RecordManager(context);
         }
@@ -108,42 +111,47 @@ public class RecordManager {
 
     public void upload(Record record) {
         if (SettingManager.getInstance().isUpload(context)) {
-            String webhookUrl = SettingManager.getInstance().getWebhookUrl(context);
-            if (webhookUrl.equals("")) {
-                return;
-            }
-            // 开始开启子线程异步上传记录
-            AsyncTask.execute(() -> {
-                MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-                JSONObject json = new JSONObject();
-                try {
-                    json.put("name", record.name);
-                    json.put("x", record.x);
-                    json.put("y", record.y);
-                    json.put("z", record.y);
-                    json.put("volume", record.getVolume());
-                    json.put("date", record.date);
-                    json.put("uid", record.uid);
-                    RequestBody requestBody = RequestBody.create(JSON, String.valueOf(json));
-                    Request request = new Request.Builder()
-                            .post(requestBody)
-                            .url(webhookUrl)
-                            .build();
-                    client.newCall(request).enqueue(new Callback() {
-                        @Override
-                        public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                            e.printStackTrace();
-                            Toast.makeText(context, "上传发生错误!请检查设置", Toast.LENGTH_SHORT).show();
-                        }
-
-                        @Override
-                        public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                        }
-                    });
-                } catch (Exception e) {
-                    e.printStackTrace();
+            try {
+                String webhookUrl = SettingManager.getInstance().getWebhookUrl(context);
+                if ("".equals(webhookUrl)) {
+                    return;
                 }
-            });
+                // 开始开启子线程异步上传记录
+                AsyncTask.execute(() -> {
+                    MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+                    JSONObject json = new JSONObject();
+                    try {
+                        json.put("name", record.name);
+                        json.put("x", record.x);
+                        json.put("y", record.y);
+                        json.put("z", record.y);
+                        json.put("volume", record.getVolume());
+                        json.put("date", record.date);
+                        json.put("uid", record.uid);
+                        RequestBody requestBody = RequestBody.create(JSON, String.valueOf(json));
+                        Request request = new Request.Builder()
+                                .post(requestBody)
+                                .url(webhookUrl)
+                                .build();
+                        client.newCall(request).enqueue(new Callback() {
+                            @Override
+                            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                                e.printStackTrace();
+                                activity.runOnUiThread(() -> Toast.makeText(context, "上传发生错误!请检查设置", Toast.LENGTH_SHORT).show());
+                            }
+
+                            @Override
+                            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                            }
+                        });
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
 
         }
     }

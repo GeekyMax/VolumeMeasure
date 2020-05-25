@@ -1,28 +1,45 @@
 package com.geekymax.volumemeasure.measurer;
 
+import android.util.Log;
+
 import com.geekymax.volumemeasure.util.LogUtil;
 
 import org.apache.commons.lang3.RandomUtils;
+import org.math.plot.utils.Array;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.indexing.conditions.Conditions;
+
 
 /**
  * @author huangmengxuan
  * @date 2020-04-28
  */
 public class UnderSurfaceHandler {
+    public static final String TAG = "Geeky-UnderSurface";
+
     private double minX;
     private double maxX;
     private double minY;
     private double maxY;
 
+    //
     public void handle(INDArray underData, INDArray topData) {
-        underData = Nd4j.concat(1, underData, Nd4j.zeros(underData.shape()[0], 1));
-        topData = Nd4j.concat(1, topData, Nd4j.ones(topData.shape()[0], 1));
-        INDArray allData = Nd4j.concat(0, underData, topData);
+//        long underLength = underData.shape()[0];
+//        long topLength = topData.shape()[0];
+//        INDArray zero = Nd4j.zeros(underLength, 1);
+//        INDArray one = Nd4j.zeros(topLength, 1);
+//        underData = Nd4j.hstack(underData, zero);
+//        topData = Nd4j.hstack(topData, one);
+        underData = Nd4j.append(underData, 1, 0, 1);
+        topData = Nd4j.append(topData, 1, 1, 1);
+//        underData = Nd4j.concat(1, underData, Nd4j.zeros(length, 1));
+//        topData = Nd4j.concat(1, topData, Nd4j.ones(topData.shape()[0], 1));
+//        INDArray allData = Nd4j.concat(0, underData, topData);
+        INDArray allData = Nd4j.vstack(underData, topData);
         for (int axis = 0; axis <= 1; axis++) {
             INDArray batch = selectFirstBatch(allData, topData, axis);
+            Log.d(TAG, "handle: batch shape" + batch.shape()[0] + " " + batch.shape()[1]);
             // batch中的top data
             INDArray topBatch = getTop(batch, true);
 
@@ -59,8 +76,8 @@ public class UnderSurfaceHandler {
      * @param learningStep 学习步长
      */
     private double perceptron(INDArray data, INDArray labels, int maxIteration, double learningStep) {
-        LogUtil.print("perceptron data", data);
-        LogUtil.print("perceptron labels", labels);
+//        LogUtil.print("perceptron data", data);
+//        LogUtil.print("perceptron labels", labels);
         double[] w = new double[]{0, 0};
         int dataSize = (int) labels.shape()[0];
         int correctCount = 0;

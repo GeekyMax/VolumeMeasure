@@ -14,7 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
 
-public class HistoryActivity extends BaseActivity {
+public class RecordActivity extends BaseActivity {
     private ListView listView;
     private HistorySwipeAdapter listAdapter;
     private static final String TAG = "Geeky-History";
@@ -24,7 +24,7 @@ public class HistoryActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history);
         Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle("历史记录");
+        toolbar.setTitle(R.string.title_activity_history);
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setHomeButtonEnabled(true);

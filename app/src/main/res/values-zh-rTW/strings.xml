@@ -30,4 +30,14 @@
 
     <!--  无记录 默认名  -->
     <string name="untitled_name">未命名</string>
+
+
+    <!--状态-->
+    <string name="state_prepare">初始化</string>
+    <string name="state_ready">就绪</string>
+    <string name="state_collecting">采集中</string>
+    <string name="state_measuring">测量中</string>
+    <string name="state_done">测量完成</string>
+
+
 </resources>

@@ -28,7 +28,7 @@ public class SettingsActivity extends BaseActivity {
                 .replace(R.id.settings, new SettingsFragment())
                 .commit();
         Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle("设置");
+        toolbar.setTitle(R.string.title_activity_settings);
         setSupportActionBar(toolbar);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

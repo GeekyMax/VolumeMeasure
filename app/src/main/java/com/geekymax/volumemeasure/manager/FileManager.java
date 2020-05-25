@@ -44,12 +44,17 @@ public class FileManager {
         clearFile(fileName);
         StringBuilder stringBuilder = new StringBuilder();
         map.forEach((id, point) -> {
-            stringBuilder.append("" + id + ", " + point.x + ", " + point.y + ", " + point.z + ", " + point.confidence + "\n");
+            stringBuilder.append("" + id + "," + point.x + "," + point.z + "," + point.y + "," + point.confidence + "\n");
         });
-        stringBuilder.append("\n");
         writeTxtToFile(fileName, stringBuilder.toString());
     }
 
+
+    public void outputPlaneHeight(double height) {
+        String fileName = "plane_height.csv";
+        clearFile(fileName);
+        writeTxtToFile(fileName, "" + height);
+    }
 
     public static void outputBitmap(String id, Bitmap bitmap) {
         File file = new File(imageFilePath + id + ".jpg");

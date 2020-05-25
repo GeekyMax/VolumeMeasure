@@ -19,7 +19,10 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.PixelFormat;
 import android.net.Uri;
+import android.opengl.GLES20;
+import android.opengl.GLSurfaceView;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
@@ -31,15 +34,34 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import com.geekymax.volumemeasure.R;
+import com.geekymax.volumemeasure.helpers.DisplayRotationHelper;
 import com.geekymax.volumemeasure.manager.StateController;
+import com.geekymax.volumemeasure.renderer.PointCloudRenderer;
+import com.google.ar.core.Camera;
+import com.google.ar.core.Frame;
+import com.google.ar.core.Plane;
+import com.google.ar.core.PointCloud;
+import com.google.ar.core.Pose;
+import com.google.ar.core.Session;
+import com.google.ar.core.TrackingState;
 
 import org.nd4j.linalg.factory.Nd4j;
+
+import java.io.IOException;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
 
 
 /**
  * This is an example activity that uses the Sceneform UX package_1 to make common AR tasks easier.
  */
-public class MainActivity extends BaseActivity {
+public class MainActivity extends BaseActivity  {
     private static final String TAG = "Geeky-Activity";
     private static final double MIN_OPENGL_VERSION = 3.0;
     //  当前全局状态

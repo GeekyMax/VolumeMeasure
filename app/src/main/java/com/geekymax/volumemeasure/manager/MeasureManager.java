@@ -1,6 +1,7 @@
 package com.geekymax.volumemeasure.manager;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Trace;
 import android.util.Log;
@@ -31,6 +32,7 @@ import org.nd4j.linalg.factory.Nd4j;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +55,11 @@ public class MeasureManager {
     private Map<Integer, MyPoint> pointMap = new HashMap<>();
 
     private Map<String, Measurer> measurerMap;
+    private long millis;
+
+    public long getMillis() {
+        return millis;
+    }
 
     private MeasureManager(Context context) {
         this.context = context;
@@ -125,8 +132,9 @@ public class MeasureManager {
     public void startMeasuring(Session session) {
         collecting = false;
         // 起新线程专门用于测量
-        Thread thread = new Thread(this::run);
-        thread.run();
+        AsyncTask.execute(this::run);
+//        Thread thread = new Thread(this::run);
+//        thread.run();
     }
 
     private void run() {
@@ -134,12 +142,17 @@ public class MeasureManager {
             TimeLogger.getLogger().log("in run 1");
 
             INDArray pointData = map2NDArray(pointMap);
+            FileManager.getInstance().outputPoint(pointMap);
+            FileManager.getInstance().outputPlaneHeight(mainPlaneHeight);
             TimeLogger.getLogger().log("in run 2");
 
             Log.d(TAG, "run: PointData: " + pointData);
             Measurer measurer = measurerMap.get(SettingManager.getInstance().getMeasurer(context));
             if (measurer != null) {
+                Date start = new Date();
                 measurer.measure(pointData, mainPlaneHeight, measureCallback);
+                Date end = new Date();
+                millis = end.getTime() - start.getTime();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -153,7 +166,7 @@ public class MeasureManager {
         TimeLogger.getLogger().log("map2NDArray:1");
         List<double[]> list = new ArrayList<>();
         map.forEach((i, p) -> {
-            list.add(new double[]{Double.valueOf(i), (double) p.x, (double) p.y, (double) p.z});
+            list.add(new double[]{Double.valueOf(i), (double) p.x, (double) p.z, (double) p.y, (double) p.confidence});
         });
         TimeLogger.getLogger().log("map2NDArray:2");
 

@@ -58,7 +58,7 @@ public class HistorySwipeAdapter extends RecyclerSwipeAdapter<HistorySwipeAdapte
             this.record = record;
             SimpleDateFormat sdf = new SimpleDateFormat("MM-dd hh:mm:ss");
             textDate.setText(sdf.format(record.date));
-            textSize.setText(String.format("%.2f * %.2f * %.2f = %.6f", record.x, record.y, record.z, record.x * record.y * record.z));
+            textSize.setText(String.format("%.3f * %.3f * %.3f = %.6f", record.x, record.y, record.z, record.x * record.y * record.z));
             imageView.setImageBitmap(record.bitmap);
             if (record.name.equals("")) {
                 name = itemView.getContext().getResources().getString(R.string.untitled_name);
